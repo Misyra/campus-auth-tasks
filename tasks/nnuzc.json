@@ -118,13 +118,6 @@
     "password": "{{PASSWORD}}",
     "isp": "{{ISP}}"
   },
-  "success_conditions": [
-    {
-      "type": "variable",
-      "variable": "login_success",
-      "value": true
-    }
-  ],
   "on_success": {
     "message": "登录成功"
   },

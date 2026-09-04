@@ -3,7 +3,8 @@
   "description": "适用于华中科技大学校园网认证页面，需先点击密码占位元素激活真实输入框后再输入密码",
   "metadata": {
     "author": "anonymous",
-    "school": "华中科技大学"
+    "school": "华中科技大学",
+    "device": "未知"
   },
   "url": "{{LOGIN_URL}}",
   "timeout": 100000,
@@ -71,13 +72,6 @@
     "password": "{{PASSWORD}}",
     "isp": "{{ISP}}"
   },
-  "success_conditions": [
-    {
-      "type": "variable",
-      "variable": "login_success",
-      "value": true
-    }
-  ],
   "on_success": {
     "message": "登录成功"
   },

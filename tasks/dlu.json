@@ -40,12 +40,6 @@
       "duration": 2000
     }
   ],
-  "success_conditions": [
-    {
-      "type": "url_matches",
-      "pattern": "success"
-    }
-  ],
   "on_success": {
     "message": "登录成功"
   },

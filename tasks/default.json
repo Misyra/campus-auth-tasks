@@ -3,6 +3,9 @@
   "description": "通用校园网认证任务：语义识别表单、智能判断结果，兼容大多数认证页面",
   "metadata": {
     "type": "builtin",
+    "author": "Misyra",
+    "school": "未知",
+    "device": "未知",
     "created": "2025-01-01"
   },
   "url": "{{LOGIN_URL}}",
@@ -68,18 +71,12 @@
       "store_as": "login_success"
     }
   ],
-  "success_conditions": [
-    {
-      "type": "variable",
-      "variable": "login_success",
-      "value": true
-    }
-  ],
   "on_success": {
     "message": "登录成功"
   },
   "on_failure": {
     "message": "登录失败，请检查账号密码或认证地址",
     "screenshot": true
-  }
+  },
+  "id": "default"
 }
