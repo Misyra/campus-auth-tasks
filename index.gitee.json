@@ -70,5 +70,19 @@
     "author": "anonymous",
     "version": "1.0.0",
     "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/xynu.json"
+  },
+  {
+    "id": "gd-telecom-qs",
+    "name": "广东电信天翼校园网登录",
+    "description": "适用于广东电信天翼校园网门户（enet.10000.gd.cn:10001/qs/）：填写账号密码、OCR 识别字母数字混合验证码后提交，成功页出现即判定成功",
+    "tags": [
+      "广东电信",
+      "天翼校园网",
+      "验证码"
+    ],
+    "author": "Misyra",
+    "version": "1.0.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/gd-telecom-qs.json",
+    "screenshot": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/snap/gd-telecom-qs.png"
   }
 ]

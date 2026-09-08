@@ -1,0 +1,68 @@
+{
+  "name": "广东电信天翼校园网登录",
+  "description": "适用于广东电信天翼校园网门户（enet.10000.gd.cn:10001/qs/）：填写账号密码、OCR 识别字母数字混合验证码后提交，成功页出现即判定成功",
+  "metadata": {
+    "author": "Misyra",
+    "school": "通用",
+    "device": "未知"
+  },
+  "url": "{{LOGIN_URL}}",
+  "timeout": 30000,
+  "variables": {
+    "username": "{{USERNAME}}",
+    "password": "{{PASSWORD}}"
+  },
+  "steps": [
+    {
+      "id": "s1",
+      "type": "input",
+      "description": "输入上网账号",
+      "selector": "#username",
+      "value": "{{username}}"
+    },
+    {
+      "id": "s2",
+      "type": "input",
+      "description": "输入登录密码",
+      "selector": "#password",
+      "value": "{{password}}"
+    },
+    {
+      "id": "s3",
+      "type": "ocr",
+      "description": "识别验证码并填入（字母数字混合）",
+      "selector": "#image_code",
+      "target_selector": "#code",
+      "store_as": "captcha_code",
+      "timeout": 20000
+    },
+    {
+      "id": "s4",
+      "type": "eval",
+      "description": "点击提交登入",
+      "script": "(() => { const btns = Array.from(document.querySelectorAll('button')); const login = btns.find(b => (b.innerText || '').includes('提交登入')); if (!login) throw new Error('未找到提交登入按钮'); login.click(); return true; })()"
+    },
+    {
+      "id": "wait_for_response",
+      "type": "sleep",
+      "description": "等待认证响应",
+      "duration": 3000
+    },
+    {
+      "id": "check_success",
+      "type": "eval",
+      "description": "成功页出现即成功",
+      "script": "(() => { const el = document.getElementById('success'); return !!(el && getComputedStyle(el).display !== 'none'); })()",
+      "store_as": "login_ok"
+    }
+  ],
+  "success_condition": "login_ok",
+  "on_success": {
+    "message": "登录成功"
+  },
+  "on_failure": {
+    "message": "登录失败，请检查账号密码或验证码识别",
+    "screenshot": true
+  },
+  "id": "gd-telecom-qs"
+}
