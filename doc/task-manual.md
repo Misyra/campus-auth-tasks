@@ -78,16 +78,15 @@ NetworkMonitorCore          网络监控循环（检测断网、触发登录、�
 3. 遍历 `config.steps`：
    - 检查是否超过全局超时
    - 跳过 `navigate` 类型步骤（已由自动导航处理）
-   - 步骤间休眠 0.5 秒
+   - 步骤间休眠 0.5 秒（可通过任务 JSON 顶层的 `step_delay` 字段配置，浮点数，单位秒）
    - 从 `StepExecutorRegistry` 查找对应的 `StepHandler`
    - 调用 `handler.execute(page, step, resolver)`
    - 记录步骤结果；任一步骤失败立即终止
-4. 所有步骤成功后，执行成功条件检查
+ 4. 所有步骤成功后，执行网络检测兜底判断
 
-**4. 成功条件判定**
+ **4. 网络检测兜底**
 
-- `success_conditions` 为空 → 调用 `_default_page_check()`，扫描页面文本中的错误关键词（中英文登录错误信息）以及常见错误 DOM 元素（`.alert-danger`、`.error-msg`、`[class*=error]` 等）
-- `success_conditions` 非空 → 逐条评估，全部满足才算成功
+ 系统统一使用网络连通性检测判断任务成功与否：任务步骤全部完成后，自动检测网络是否可达。网络通 = 认证成功，网络断 = 认证失败。原有 `success_conditions` 字段仅保留兼容性，不再参与判断。
 
 ---
 
@@ -97,14 +96,13 @@ NetworkMonitorCore          网络监控循环（检测断网、触发登录、�
 
 模板语法：`{{变量名}}`，正则匹配 `\{\{(\w+)\}\}`。
 
-**四级查找优先级（从高到低）：**
+**三级查找优先级（从高到低）：**
 
 | 优先级 | 来源 | 说明 |
 |--------|------|------|
 | 1 | 运行时变量 | `eval`/`ocr` 步骤通过 `store_as` 写入，以及任务元数据（`url`、`name`、`description`） |
-| 2 | 用户自定义变量 | Web 控制台设置页面中配置的自定义变量 |
-| 3 | 环境变量 | OS 环境变量 + config 覆盖 |
-| 4 | 任务变量 | 任务 JSON 的 `variables` 字段（自身也支持模板引用） |
+| 2 | 环境变量 + 自定义变量 | OS 环境变量 + config 覆盖；自定义变量由 `build_login_env_vars()` 合并进 `env_vars` 字典，不单独成级 |
+| 3 | 任务变量 | 任务 JSON 的 `variables` 字段（自身也支持模板引用） |
 
 **递归解析规则：**
 - 解析后的值如果仍包含 `{{`，会递归解析，最大深度 8 层
@@ -121,7 +119,7 @@ NetworkMonitorCore          网络监控循环（检测断网、触发登录、�
 
 ## Frame 上下文切换
 
-通过步骤的 `frame` 字段指定目标 frame，`StepHandler._resolve_frame()` 依次尝试三种定位方式：
+通过步骤的 `frame` 字段指定目标 frame（必须是字符串，不支持布尔值），`StepHandler._resolve_frame()` 依次尝试三种定位方式：
 
 1. **按 name 属性：** `page.frame(name=frame_selector)`
 2. **按 URL 匹配：** `page.frame(url=frame_selector)`
@@ -130,6 +128,13 @@ NetworkMonitorCore          网络监控循环（检测断网、触发登录、�
 如果三种方式都失败，系统会回退到主页面继续执行（不会直接失败），这是一种容错设计。
 
 返回的 frame 对象作为 `ctx` 传入 `_find_element()`，所有元素查找都在该上下文中进行。
+
+`frame` 字段只接受字符串类型。执行器在配置解析阶段（`StepConfig.from_dict`）和运行时阶段（`_resolve_frame`）各有一次类型检查：
+
+- **配置解析时：** 如果 `frame` 的值不是字符串且不为 `null`（例如 `true`、`123` 等），会记录一条警告日志 `[StepConfig] 步骤 X 的 frame 字段应为字符串，实际为 bool，已忽略`，并自动清空该字段。
+- **运行时：** 如果 `frame` 的值仍不是字符串，会记录 `[frame] 步骤 X 的 frame 字段应为字符串，将回退到主页面执行`，然后直接使用主页面执行步骤。
+
+两层防御确保错误的 `frame` 类型不会导致执行器崩溃，而是安全降级到主页面。
 
 ---
 
@@ -193,6 +198,17 @@ window.chrome = {
 - 每个步骤的执行都包裹在 try/except 中，异常被捕获并返回 `(False, 错误信息)`
 - 全局超时：每步执行前检查 `perf_counter() - start > timeout / 1000`，超时立即失败
 - 任一步骤失败 → 调用 `_handle_failure()` → 截图 + 构建错误消息 → 返回
+
+### 步骤自动降级
+
+部分步骤类型在正常执行失败后会自动降级到备用方式，提高兼容性：
+
+| 步骤类型 | 降级行为 |
+|----------|----------|
+| `input` | 普通 `fill()` 失败 → 自动降级到 JS 强制输入（跳过可见性检查，通过原生 setter 设置值并触发完整事件链：focus → clear → set value → input → change → blur） |
+| `click` | 普通 `click()` 失败 → 自动降级到 `dispatch_event('click')` 强制点击 |
+
+所有降级自动完成，无需手动配置，也不支持关闭。
 
 ### 监控重试机制
 
@@ -265,7 +281,7 @@ window.chrome = {
 
 每个步骤必须包含 `id` 和 `type` 字段。`type` 必须是以下之一：
 
-`navigate`（已废弃）、`input`、`click`、`select`、`click_select`、`wait`、`wait_url`、`eval`、`custom_js`、`screenshot`、`sleep`、`ocr`
+`navigate`（已废弃，请使用任务的 `url` 字段）、`custom_js`（已废弃，请使用 `eval`）、`input`、`click`、`select`、`click_select`、`wait`、`wait_url`、`eval`、`screenshot`、`sleep`、`ocr`
 
 各类型的额外必填字段：
 
@@ -279,26 +295,17 @@ window.chrome = {
 | `wait` | `selector` |
 | `wait_url` | `pattern` |
 | `eval` | `script`（兼容已废弃的 `code`） |
-| `custom_js` | `script`（兼容已废弃的 `code`） |
 | `screenshot` | 无 |
 | `sleep` | 无 |
 | `ocr` | `selector` |
 
-### 成功条件校验
+### 成功判断
 
-每个条件必须包含 `type` 字段：
-
-| 类型 | 必填字段 |
-|------|----------|
-| `variable` | `variable` |
-| `url_contains` | `pattern` |
-| `url_matches` | `pattern` |
-| `element_exists` | `selector` |
-| `js_expression` | `script` |
+系统统一使用网络连通性检测判断任务成功与否（详见 [任务编写指南](task-writing-guide.md)）。原有 `success_conditions` 字段仅保留兼容性，不再参与判断。
 
 ### 危险步骤检测
 
-`eval` 和 `custom_js` 步骤会被标记为危险步骤。后端保存时会记录警告日志（包含代码内容，截断至 2000 字符），前端会弹出安全确认对话框。此检测不会阻止保存，仅做提醒。
+`eval` 步骤会被标记为危险步骤。后端保存时会记录警告日志（包含代码内容，截断至 2000 字符），前端会弹出安全确认对话框。此检测不会阻止保存，仅做提醒。
 
 ### Task ID 校验
 
@@ -497,7 +504,6 @@ tasks/
 
 | 变量 | 说明 |
 |------|------|
-| `Campus-Auth_PROJECT_ROOT` | 项目根目录路径 |
-| `Campus-Auth_START_EXECUTABLE` | 打包可执行文件路径 |
-| `Campus-Auth_AUTO_OPEN_BROWSER` | 是否自动打开浏览器 |
-| `Campus-Auth_ENV_FILE` | .env 文件路径 |
+| `CAMPUS_AUTH_PROJECT_ROOT` | 项目根目录路径 |
+| `CAMPUS_AUTH_START_EXECUTABLE` | 打包可执行文件路径 |
+| `CAMPUS_AUTH_AUTO_OPEN_BROWSER` | 是否自动打开浏览器 |

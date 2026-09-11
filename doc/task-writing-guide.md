@@ -35,7 +35,7 @@
     "isp": "{{ISP}}"
   },
   "steps": [],
-    "on_success": { "message": "登录成功" },
+  "on_success": { "message": "登录成功" },
   "on_failure": { "message": "登录失败", "screenshot": true }
 }
 ```
@@ -47,14 +47,18 @@
 | `name` | 是 | — | 任务名称，显示在任务列表中 |
 | `description` | 否 | `""` | 任务描述 |
 | `metadata` | 否 | `{}` | 自由结构的附加信息（作者、适配型号等），执行器不读取，建议放在靠前位置便于阅读 |
-| `url` | 否 | `""` | 自定义认证地址。**提交/分享任务时请留空**，由用户自行在系统中设置认证地址或手动填入 |
+| `url` | 否 | `""` | 自定义认证地址。**提交/分享任务时请留空或设为 `"{{LOGIN_URL}}"`**，由用户自行在系统中设置认证地址或手动填入 |
 | `timeout` | 否 | `30000` | 全局超时时间（毫秒） |
 | `variables` | 否 | `{}` | 任务级变量，支持 `{{VAR}}` 模板引用其他变量 |
 | `steps` | 是 | `[]` | 步骤列表，按顺序执行 |
-| `reveal_hidden` | 否 | `false` | 执行前自动显示所有隐藏输入框，适用于深澜/Sangfor 等隐藏输入框场景 |
-| `success_conditions` | 否（已废弃） | — | 原有成功条件字段，系统不再使用 |
+| `reveal_hidden` | 否 | `true` | 执行前自动显示所有隐藏输入框，适用于深澜/Sangfor 等隐藏输入框场景 |
+| `step_delay` | 否 | `0.5` | 步骤间休眠时间（秒），用于控制每一步之间的等待间隔。值越小任务执行越快，但网络延迟较大时可适当增大 |
+| `success_conditions` | 否（已废弃） | — | 原有成功条件字段，系统不再使用。旧任务残留原样保留即可，新任务无需添加 |
 | `on_success` | 否 | `{}` | 成功时的处理，如 `{ "message": "登录成功" }` |
 | `on_failure` | 否 | `{}` | 失败时的处理，如 `{ "message": "登录失败", "screenshot": true }` |
+| `id` | 否（仓库要求） | — | 任务 ID，提交到任务仓库时须与文件名一致（如 `tasks/hust.json` 对应 `"id": "hust"`） |
+
+> **步骤间延时：** 默认情况下，执行器在每一步执行完后会休眠 0.5 秒，为页面渲染留出缓冲。你可以在任务 JSON 顶层设置 `step_delay` 字段来调整这个间隔。
 
 ---
 
@@ -352,9 +356,8 @@ ddddocr 内置两套模型，`old` 参数控制使用哪一套：
 ### 变量解析优先级
 
 1. 运行时变量（`eval` 的 `store_as`）
-2. 用户自定义变量（Web 控制台设置）
-3. 环境变量（系统环境与 `.env`）
-4. 任务文件内 `variables` 字段
+2. 环境变量 + 自定义变量（系统环境 + config 覆盖；自定义变量由 `build_login_env_vars()` 合并进 `env_vars` 字典，不单独成级）
+3. 任务文件内 `variables` 字段
 
 未找到的变量会原样保留在输出中（不会报错）。
 
@@ -479,7 +482,7 @@ ddddocr 内置两套模型，`old` 参数控制使用哪一套：
       "store_as": "login_success"
     }
   ],
-    "on_success": { "message": "登录成功" },
+  "on_success": { "message": "登录成功" },
   "on_failure": { "message": "登录失败", "screenshot": true }
 }
 ```
@@ -500,7 +503,7 @@ ddddocr 内置两套模型，`old` 参数控制使用哪一套：
     { "id": "s3", "type": "click", "selector": "#login-btn" },
     { "id": "s4", "type": "sleep", "duration": 3000 }
   ],
-    "on_success": { "message": "登录成功" },
+  "on_success": { "message": "登录成功" },
   "on_failure": { "message": "登录失败", "screenshot": true }
 }
 ```
@@ -526,7 +529,7 @@ ddddocr 内置两套模型，`old` 参数控制使用哪一套：
     { "id": "s4", "type": "click", "selector": "#login-btn" },
     { "id": "s5", "type": "sleep", "duration": 3000 }
   ],
-    "on_success": { "message": "登录成功" },
+  "on_success": { "message": "登录成功" },
   "on_failure": { "message": "登录失败", "screenshot": true }
 }
 ```
@@ -565,7 +568,7 @@ ddddocr 内置两套模型，`old` 参数控制使用哪一套：
     },
     { "id": "s4", "type": "sleep", "duration": 3000 }
   ],
-    "on_success": { "message": "登录成功" },
+  "on_success": { "message": "登录成功" },
   "on_failure": { "message": "登录失败", "screenshot": true }
 }
 ```
@@ -726,3 +729,5 @@ A: 尝试切换 `ocr` 步骤的 `old` 参数（`true`/`false`），两套模型�
 
 - **快速分享**：在 Web 控制台导出任务 JSON，到 [Issues](https://github.com/Misyra/campus-auth-tasks/issues/new) 提交
 - **提交 PR**：Fork 仓库 → 添加任务文件 → 提交 Pull Request，详见 [任务仓库贡献指南](https://github.com/Misyra/campus-auth-tasks#贡献)
+
+**门户截图（可选，非必需）：** 提供认证页面的门户截图有助于他人确认是否为同一系统，但不是提交的必要条件。截图请放入仓库 `snap/` 目录（文件名与任务 `id` 一致，截图前遮挡账号、密码等个人信息），并在 `index.json` / `index.gitee.json` 的对应条目中添加 `screenshot` 字段引用该图片。
