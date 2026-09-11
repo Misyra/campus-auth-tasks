@@ -25,7 +25,7 @@ Campus-Auth 的校园网登录任务共享仓库。
 | **广东电信天翼校园网登录** | 字母数字混合验证码（OCR 识别），附门户截图 |
 | **四川旅游学院校园网登录** | 隐藏输入框自动填充，支持服务选择、条件验证码识别，附门户截图 |
 
-> 部分任务在索引中附带 `screenshot` 字段（门户截图，便于确认是否为同一认证页面）。提供门户截图**非必需**，有截图时放入 `snap/` 目录（须为 AVIF 格式，提交前用 `python tools/convert-snaps-avif.py` 转换）并在 `index.json` / `index.gitee.json` 中引用即可。
+> 部分任务在索引中附带 `screenshot` 字段（门户截图，便于确认是否为同一认证页面）。提供门户截图**非必需**，有截图时放入 `snap/` 目录（须为 WebP 格式：Gitee 对 AVIF 的 MIME 会导致无法显示，WebP 已实测正常）并在 `index.json` / `index.gitee.json` 中引用即可。
 
 ## 贡献
 
@@ -72,7 +72,7 @@ Campus-Auth 的校园网登录任务共享仓库。
    }
    ```
 5. 同步更新 `index.gitee.json`（相同条目，仅 `url` 换成 Gitee raw 地址）
-6. （可选，非必需）如需提供门户截图：将截图放入 `snap/` 目录（如 `snap/xxx_university.png`，截图前请遮挡账号、密码等个人信息），并在两份索引的对应条目中添加 `screenshot` 字段引用该图片
+6. （可选，非必需）如需提供门户截图：将截图转为 WebP 后放入 `snap/` 目录（如 `snap/xxx_university.webp`，截图前请遮挡账号、密码等个人信息），并在两份索引的对应条目中添加 `screenshot` 字段引用该图片
 
 **第三步：提交并创建 PR**
 
@@ -82,7 +82,7 @@ git commit -m "feat: 添加 XXX 大学登录任务"
 git push origin master
 ```
 
-> 如提供了门户截图，一并 `git add snap/xxx_university.png`。`temp/` 下的待审核文件不随 PR 提交（审核通过后已移至 `tasks/`）。
+> 如提供了门户截图，一并 `git add snap/xxx_university.webp`。`temp/` 下的待审核文件不随 PR 提交（审核通过后已移至 `tasks/`）。
 
 然后在 GitHub 上打开你的 Fork 页面，点击 **Contribute → Open pull request**，填写说明后提交。
 

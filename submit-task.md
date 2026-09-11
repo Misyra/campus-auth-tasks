@@ -123,13 +123,12 @@ Move-Item -Path "temp/hust.json" -Destination "tasks/hust.json"
 
 提供门户截图有助于他人确认是否为同一认证页面，但不是提交的必要条件。要求如下：
 
-- 截图须为 AVIF 格式：提交前运行 `python tools/convert-snaps-avif.py` 一键转换（需本机安装 ffmpeg），转换成功后源文件自动删除
-- 截图放入 `snap/` 目录，文件名与任务 `id` 一致（如 `snap/hust.avif`）
+- 截图须为 WebP 格式（Gitee 镜像对 AVIF 返回的 MIME 会导致图片无法显示，WebP 已实测双端正常）：提交前转换，如 `ffmpeg -y -i snap/hust.png -q:v 80 snap/hust.webp`，转完后删除源文件
 - 截图前请遮挡账号、密码、验证码等个人信息
 - 在 `index.json` / `index.gitee.json` 的对应条目中添加 `screenshot` 字段，分别指向 GitHub / Gitee raw 地址，例如：
 
 ```json
-"screenshot": "https://raw.githubusercontent.com/Misyra/campus-auth-tasks/master/snap/hust.avif"
+"screenshot": "https://raw.githubusercontent.com/Misyra/campus-auth-tasks/master/snap/hust.webp"
 ```
 
 ### Step 6b: 同步镜像索引 `index.gitee.json`
@@ -164,7 +163,7 @@ git push origin master && git push gitee master
 
 > **注意：** 提交中不需要包含 `temp/` 下的文件（已移至 `tasks/`），也不需要包含 `doc/`（编写指南不属于任务提交内容）。
 > `index.gitee.json` 是 Gitee 镜像索引，需同步提交并在两边 remote 都推送。
-> 如提供了门户截图，一并 `git add snap/hust.png`（截图须与 `screenshot` 字段路径一致）。
+> 如提供了门户截图，一并 `git add snap/hust.webp`（截图须与 `screenshot` 字段路径一致）。
 
 ## 验证清单
 
