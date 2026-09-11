@@ -1,0 +1,93 @@
+{
+  "type": "browser",
+  "id": "sctu-eportal",
+  "name": "四川旅游学院校园网登录",
+  "description": "适用于四川旅游学院 ePortal 门户（172.16.10.76:8080/eportal/index.jsp）：账号/密码真实输入框 display:none（reveal_hidden 经 JS 原生 setter 强制填入），自定义服务下拉经 #serviceContent 异步注入（默认“校园网”），提交按钮为 #loginLink（onclick=doauthen()），验证码 #validImage 仅条件出现",
+  "url": "{{LOGIN_URL}}",
+  "timeout": 30000,
+  "step_delay": 0.5,
+  "navigation_wait": 1.5,
+  "reveal_hidden": true,
+  "variables": {
+    "username": "{{USERNAME}}",
+    "password": "{{PASSWORD}}",
+    "isp": "{{ISP}}"
+  },
+  "steps": [
+    {
+      "id": "wait_form",
+      "type": "wait",
+      "description": "等待登录表单就绪（含 getServices 异步注入服务列表）",
+      "selector": "#loginLink",
+      "timeout": 10000
+    },
+    {
+      "id": "fill_username",
+      "type": "input",
+      "description": "输入上网账号",
+      "selector": "#username",
+      "value": "{{username}}",
+      "clear": true
+    },
+    {
+      "id": "fill_password",
+      "type": "input",
+      "description": "输入登录密码",
+      "selector": "#pwd",
+      "value": "{{password}}",
+      "clear": true
+    },
+    {
+      "id": "select_service",
+      "type": "click_select",
+      "description": "选择服务（自定义下拉，选项由 getServices 注入 #serviceContent；无匹配或页面无此服务时跳过）",
+      "selector": "#selectDisname",
+      "option_selector": "#serviceContent",
+      "value": "{{isp}}",
+      "select_delay": 300,
+      "required": false
+    },
+    {
+      "id": "ocr_captcha",
+      "type": "ocr",
+      "description": "条件验证码识别并填入（#isDisplayValidCode 默认隐藏，无验证码时跳过）",
+      "selector": "#validImage",
+      "target_selector": "#validCode",
+      "store_as": "captcha_text",
+      "timeout": 20000,
+      "required": false
+    },
+    {
+      "id": "click_login",
+      "type": "click",
+      "description": "点击连接按钮（#loginLink，onclick=doauthen()）",
+      "selector": "#loginLink, #loginLink_div"
+    },
+    {
+      "id": "wait_response",
+      "type": "sleep",
+      "description": "等待登录请求返回",
+      "duration": 3000
+    },
+    {
+      "id": "screenshot_after",
+      "type": "screenshot",
+      "description": "登录后截图",
+      "required": false
+    }
+  ],
+  "on_success": {
+    "message": "登录成功"
+  },
+  "on_failure": {
+    "message": "登录失败，请检查账号密码、服务选择或验证码",
+    "screenshot": true
+  },
+  "metadata": {
+    "author": "anonymous",
+    "school": "四川旅游学院",
+    "device": "ePortal",
+    "portal": "eportal",
+    "created": "2026-09-11"
+  }
+}
