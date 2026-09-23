@@ -1,0 +1,30 @@
+{
+  "type": "http",
+  "task_id": "haust",
+  "name": "河南科技大学校园网直连（大学掌体系）",
+  "description": "适用于河南科技大学（裕达 / 大学掌 Portal，认证服务器 10.100.51.1）的直连登录：先 GET 取 CSRF 令牌，再 POST 提交账号密码。该门户的令牌绑定 TCP 连接（取令牌与登录必须同一条连接），故任务使用了「前置请求」。需要支持前置请求的版本（v5.0.2 之后）。网关换了皮肤或 nasId 不是 1 时，按实测抓包调整请求头里的 Referer 与表单里的 nasId。",
+  "method": "POST",
+  "url": "http://10.100.51.1/api/account/login",
+  "auth_url": "",
+  "headers": "Content-Type: application/x-www-form-urlencoded; charset=UTF-8\nX-Requested-With: XMLHttpRequest\nX-CSRF-Token: {csrf}\nOrigin: http://10.100.51.1\nReferer: http://10.100.51.1/tpl/stu-xy/login_account.html",
+  "body": "username={form_username}&password={form_password}&nasId=1&userIpv4={local_ip}&userMac={local_mac}&isp=local&timeLimit=",
+  "success_pattern": "\"code\":0",
+  "failure_pattern": "\"code\":1",
+  "crypto_script": "// 表单体是 x-www-form-urlencoded，而模板替换不做转义：密码里出现 & = #\n// 就会截断表单，故这里先做一次 URL 编码\nfunction transform(ctx) {\n  return {\n    form_username: url_encode(ctx.username || \"\"),\n    form_password: url_encode(ctx.password || \"\"),\n  };\n}",
+  "pre_request": {
+    "method": "GET",
+    "url": "http://10.100.51.1/api/csrf-token",
+    "headers": "X-Requested-With: XMLHttpRequest",
+    "body": "",
+    "extract": "json:csrf_token",
+    "name": "csrf"
+  },
+  "ignore_https_errors": null,
+  "metadata": {
+    "author": "heragehome",
+    "school": "河南科技大学",
+    "device": "大学掌（裕达）Portal",
+    "protocol": "GET /api/csrf-token → POST /api/account/login；CSRF 令牌绑定 TCP 连接",
+    "source": "https://github.com/heragehome/haust-auto-login"
+  }
+}
