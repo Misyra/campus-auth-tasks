@@ -1,0 +1,17 @@
+[
+  {
+    "id": "haust",
+    "name": "河南科技大学校园网直连（大学掌体系）",
+    "description": "直连渠道：先取 CSRF 令牌再 POST 登录，令牌绑定连接。适用于河南科技大学（裕达 / 大学掌 Portal）",
+    "tags": [
+      "河南科技大学",
+      "大学掌",
+      "直连"
+    ],
+    "author": "heragehome",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/heragehome/haust-auto-login",
+    "url": "https://raw.githubusercontent.com/Misyra/campus-auth-tasks/master/tasks/haust.json"
+  }
+]
