@@ -188,11 +188,11 @@ git push origin master
 
 ### 任务录制器
 
-推荐使用 [Campus-Auth 任务录制器](https://github.com/Misyra/Campus-Auth/blob/main/tools/task-recorder.user.js)（油猴脚本）可视化选取元素并生成任务 JSON。
+推荐使用 [Campus-Auth 任务录制器](https://github.com/Misyra/Campus-Auth-rs/blob/master/resources/tools/task-recorder.user.js)（油猴脚本）可视化选取元素并生成任务 JSON。
 
 ### 任务编写指南
 
-详细的步骤类型说明、变量系统、选择器建议等请参考 [任务编写指南](https://github.com/Misyra/Campus-Auth/blob/main/doc/task-writing-guide.md)。
+详细的步骤类型说明、变量系统、选择器建议等请参考仓库内的 [任务编写指南](doc/task-writing-guide.md)。
 
 ## License
 
