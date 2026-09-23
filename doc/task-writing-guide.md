@@ -730,4 +730,4 @@ A: 尝试切换 `ocr` 步骤的 `old` 参数（`true`/`false`），两套模型�
 - **快速分享**：在 Web 控制台导出任务 JSON，到 [Issues](https://github.com/Misyra/campus-auth-tasks/issues/new) 提交
 - **提交 PR**：Fork 仓库 → 添加任务文件 → 提交 Pull Request，详见 [任务仓库贡献指南](https://github.com/Misyra/campus-auth-tasks#贡献)
 
-**门户截图（可选，非必需）：** 提供认证页面的门户截图有助于他人确认是否为同一系统，但不是提交的必要条件。截图请放入仓库 `snap/` 目录（文件名与任务 `id` 一致，截图前遮挡账号、密码等个人信息），并在 `index.json` / `index.gitee.json` 的对应条目中添加 `screenshot` 字段引用该图片。
+**门户截图（可选，非必需）：** 提供认证页面的门户截图有助于他人确认是否为同一系统，但不是提交的必要条件。截图请放入仓库 `snap/` 目录（文件名与任务 `id` 一致，截图前遮挡账号、密码等个人信息），并在 `index.json` / `index.gitee.json`（**浏览器任务**文件的两份索引）的对应条目中添加 `screenshot` 字段引用该图片。**直连任务没有浏览器登录页可截，不适用本条**；两类任务各有一份索引与各自的收录规则，见仓库 README 的「索引文件」一节。
