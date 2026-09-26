@@ -2,7 +2,7 @@
   "type": "http",
   "task_id": "haust",
   "name": "河南科技大学校园网直连（大学掌体系）",
-  "description": "适用于河南科技大学（裕达 / 大学掌 Portal，认证服务器 10.100.51.1）的直连登录：先 GET 取 CSRF 令牌，再 POST 提交账号密码。该门户的令牌绑定 TCP 连接（取令牌与登录必须同一条连接），故任务使用了「前置请求」。运营商在方案的「运营商」字段选择：移动→wcmcc、联通→unicom、电信→wtelecom，未选或校园账号落回 local（取值对照原仓库 README：local / wcmcc / unicom / wtelecom），映射表写在凭据变换脚本开头可改。需要支持直连 ISP 字段（脚本 ctx.isp）的版本。网关换了皮肤或 nasId 不是 1 时，按实测抓包调整请求头里的 Referer 与表单里的 nasId。",
+  "description": "适用于河南科技大学（裕达 / 大学掌 Portal，认证服务器 10.100.51.1）的直连登录：先 GET 取 CSRF 令牌，再 POST 提交账号密码。该门户的令牌绑定 TCP 连接（取令牌与登录必须同一条连接），故任务使用了「前置请求」。运营商在方案的「运营商」字段选择：移动→wcmcc、联通→unicom、电信→wtelecom，未选或校园账号落回 local（取值对照原仓库 README：local / wcmcc / unicom / wtelecom），映射表写在凭据变换脚本开头可改。需要支持直连 ISP 字段（脚本 ctx.isp）的版本。网关换了皮肤或 nasId 不是 1 时，按实测抓包调整请求头里的 Referer 与表单里的 nasId。成功与否以登录后的网络检测判定（公网可达即成功），不依赖响应内容。",
   "method": "POST",
   "url": "http://10.100.51.1/api/account/login",
   "auth_url": "",
@@ -27,5 +27,6 @@
     "protocol": "GET /api/csrf-token → POST /api/account/login；CSRF 令牌绑定 TCP 连接",
     "source": "https://github.com/heragehome/haust-auto-login"
   },
-  "version": "1.1.0"
+  "version": "1.1.1",
+  "success_check": "network"
 }

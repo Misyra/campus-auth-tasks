@@ -2,7 +2,7 @@
   "type": "http",
   "task_id": "jcu-drcom-eportal",
   "name": "景德镇陶瓷大学校园网直连（Dr.COM eportal）",
-  "description": "适用于景德镇陶瓷大学 Dr.COM eportal 门户（172.29.0.2:801，dr1003 回调）的直连登录：密钥为本机 IP 逐字符异或的结果，账号、密码等字段再与密钥异或转十六进制后经 GET 提交（encrypt=1）。运营商在方案的「运营商」字段选择（移动/联通/电信，或自定义填关键字如 校园网/@xyw），到 dr1003 后缀的映射表写在凭据变换脚本开头，可按门户要求自行增删改；账号里手动写了 @ 后缀时不再追加（兼容旧用法）。需要支持直连 ISP 字段（脚本 ctx.isp）的版本；未升级前可临时把后缀写在账号里。",
+  "description": "适用于景德镇陶瓷大学 Dr.COM eportal 门户（172.29.0.2:801，dr1003 回调）的直连登录：密钥为本机 IP 逐字符异或的结果，账号、密码等字段再与密钥异或转十六进制后经 GET 提交（encrypt=1）。运营商在方案的「运营商」字段选择（移动/联通/电信，或自定义填关键字如 校园网/@xyw），到 dr1003 后缀的映射表写在凭据变换脚本开头，可按门户要求自行增删改；账号里手动写了 @ 后缀时不再追加（兼容旧用法）。需要支持直连 ISP 字段（脚本 ctx.isp）的版本；未升级前可临时把后缀写在账号里。成功与否以登录后的网络检测判定（公网可达即成功），不依赖响应内容。",
   "method": "GET",
   "url": "http://172.29.0.2:801/eportal/portal/login?callback={callback}&login_method={login_method}&user_account={user_account}&user_password={user_password}&wlan_user_ip={wlan_user_ip}&wlan_user_ipv6={wlan_user_ipv6}&wlan_user_mac={wlan_user_mac}&wlan_ac_ip={wlan_ac_ip}&wlan_ac_name={wlan_ac_name}&jsVersion={jsVersion}&terminal_type={terminal_type}&lang={lang}&encrypt=1&v={v}",
   "auth_url": "http://172.29.0.2/",
@@ -19,5 +19,6 @@
     "protocol": "GET /eportal/portal/login（encrypt=1）：密钥 = 本机 IP 逐字符异或，字段值 = 字符逐个与密钥异或的两位十六进制",
     "source": "自用 login.sh（OpenWrt/busybox 实测脚本）移植"
   },
-  "version": "1.1.0"
+  "version": "1.1.1",
+  "success_check": "network"
 }
