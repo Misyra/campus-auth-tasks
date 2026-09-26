@@ -1,0 +1,22 @@
+{
+  "type": "http",
+  "task_id": "jcu-drcom-eportal",
+  "name": "景德镇陶瓷大学校园网直连（Dr.COM eportal）",
+  "description": "适用于景德镇陶瓷大学 Dr.COM eportal 门户（172.29.0.2:801，dr1003 回调）的直连登录：密钥为本机 IP 逐字符异或的结果，账号、密码等字段再与密钥异或转十六进制后经 GET 提交（encrypt=1）。运营商后缀按 Dr.COM 惯例直接写在账号里（如 2023xxxx@cmcc / @unicom / @telecom / @xyw，校园网账号按学校要求通常不填后缀）。需要支持凭据变换脚本与本机 IP 占位符的版本（v5.0.2 之后）。",
+  "method": "GET",
+  "url": "http://172.29.0.2:801/eportal/portal/login?callback={callback}&login_method={login_method}&user_account={user_account}&user_password={user_password}&wlan_user_ip={wlan_user_ip}&wlan_user_ipv6={wlan_user_ipv6}&wlan_user_mac={wlan_user_mac}&wlan_ac_ip={wlan_ac_ip}&wlan_ac_name={wlan_ac_name}&jsVersion={jsVersion}&terminal_type={terminal_type}&lang={lang}&encrypt=1&v={v}",
+  "auth_url": "http://172.29.0.2/",
+  "headers": "",
+  "body": "",
+  "success_pattern": "success",
+  "failure_pattern": "fail",
+  "crypto_script": "// Dr.COM eportal（dr1003，encrypt=1）：密钥 = 本机 IP 逐字符异或，\n// 各字段字符再与密钥异或后转两位十六进制（与门户页面 JS 同一算法）。\n// 运营商后缀按 Dr.COM 惯例并入账号：方案里账号填 2023xxxx@cmcc / @unicom /\n// @telecom / @xyw，校园网账号通常不填后缀（具体以学校门户要求为准）。\nfunction xorHex(str, key) {\n  var out = \"\";\n  for (var i = 0; i < str.length; i++) {\n    var x = str.charCodeAt(i) ^ key;\n    out += (x < 16 ? \"0\" : \"\") + x.toString(16);\n  }\n  return out;\n}\nfunction transform(ctx) {\n  var ip = ctx.local_ip || \"\";\n  if (!ip) {\n    throw new Error(\"无法获取本机 IP（ctx.local_ip 为空），请确认已连接校园网\");\n  }\n  var key = 0;\n  for (var i = 0; i < ip.length; i++) {\n    key ^= ip.charCodeAt(i);\n  }\n  return {\n    callback: xorHex(\"dr1003\", key),\n    login_method: xorHex(\"1\", key),\n    user_account: xorHex(\",0,\" + (ctx.username || \"\"), key),\n    user_password: xorHex(ctx.password || \"\", key),\n    wlan_user_ip: xorHex(ip, key),\n    wlan_user_ipv6: \"\",\n    wlan_user_mac: \"\",\n    wlan_ac_ip: \"\",\n    wlan_ac_name: \"\",\n    jsVersion: xorHex(\"4.2.1\", key),\n    terminal_type: xorHex(\"1\", key),\n    lang: xorHex(\"zh-cn\", key),\n    v: String(Math.floor(Math.random() * 9000) + 1000)\n  };\n}",
+  "ignore_https_errors": null,
+  "metadata": {
+    "author": "Misyra",
+    "school": "景德镇陶瓷大学",
+    "device": "Dr.COM eportal（dr1003）",
+    "protocol": "GET /eportal/portal/login（encrypt=1）：密钥 = 本机 IP 逐字符异或，字段值 = 字符逐个与密钥异或的两位十六进制",
+    "source": "自用 login.sh（OpenWrt/busybox 实测脚本）移植"
+  }
+}

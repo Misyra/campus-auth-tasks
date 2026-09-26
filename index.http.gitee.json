@@ -13,5 +13,20 @@
     "type": "http",
     "source": "https://github.com/heragehome/haust-auto-login",
     "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/haust.json"
+  },
+  {
+    "id": "jcu-drcom-eportal",
+    "name": "景德镇陶瓷大学校园网直连（Dr.COM eportal）",
+    "description": "直连渠道：按本机 IP 异或推导密钥，加密账号密码后 GET 提交（dr1003 回调）。适用于景德镇陶瓷大学 Dr.COM eportal 门户；运营商后缀（@cmcc 等）直接写在账号里",
+    "tags": [
+      "景德镇陶瓷大学",
+      "Dr.COM",
+      "eportal",
+      "直连"
+    ],
+    "author": "Misyra",
+    "version": "1.0.0",
+    "type": "http",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/jcu-drcom-eportal.json"
   }
 ]
