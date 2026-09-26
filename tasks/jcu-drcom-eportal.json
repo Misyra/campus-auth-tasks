@@ -2,7 +2,7 @@
   "type": "http",
   "task_id": "jcu-drcom-eportal",
   "name": "景德镇陶瓷大学校园网直连（Dr.COM eportal）",
-  "description": "适用于景德镇陶瓷大学 Dr.COM eportal 门户（172.29.0.2:801，dr1003 回调）的直连登录：密钥为本机 IP 逐字符异或的结果，账号、密码等字段再与密钥异或转十六进制后经 GET 提交（encrypt=1）。运营商后缀按 Dr.COM 惯例直接写在账号里（如 2023xxxx@cmcc / @unicom / @telecom / @xyw，校园网账号按学校要求通常不填后缀）。需要支持凭据变换脚本与本机 IP 占位符的版本（v5.0.2 之后）。",
+  "description": "适用于景德镇陶瓷大学 Dr.COM eportal 门户（172.29.0.2:801，dr1003 回调）的直连登录：密钥为本机 IP 逐字符异或的结果，账号、密码等字段再与密钥异或转十六进制后经 GET 提交（encrypt=1）。运营商在方案的「运营商」字段选择（移动/联通/电信，或自定义填关键字如 校园网/@xyw），到 dr1003 后缀的映射表写在凭据变换脚本开头，可按门户要求自行增删改；账号里手动写了 @ 后缀时不再追加（兼容旧用法）。需要支持直连 ISP 字段（脚本 ctx.isp）的版本；未升级前可临时把后缀写在账号里。",
   "method": "GET",
   "url": "http://172.29.0.2:801/eportal/portal/login?callback={callback}&login_method={login_method}&user_account={user_account}&user_password={user_password}&wlan_user_ip={wlan_user_ip}&wlan_user_ipv6={wlan_user_ipv6}&wlan_user_mac={wlan_user_mac}&wlan_ac_ip={wlan_ac_ip}&wlan_ac_name={wlan_ac_name}&jsVersion={jsVersion}&terminal_type={terminal_type}&lang={lang}&encrypt=1&v={v}",
   "auth_url": "http://172.29.0.2/",
@@ -10,7 +10,7 @@
   "body": "",
   "success_pattern": "success",
   "failure_pattern": "fail",
-  "crypto_script": "// Dr.COM eportal（dr1003，encrypt=1）：密钥 = 本机 IP 逐字符异或，\n// 各字段字符再与密钥异或后转两位十六进制（与门户页面 JS 同一算法）。\n// 运营商后缀按 Dr.COM 惯例并入账号：方案里账号填 2023xxxx@cmcc / @unicom /\n// @telecom / @xyw，校园网账号通常不填后缀（具体以学校门户要求为准）。\nfunction xorHex(str, key) {\n  var out = \"\";\n  for (var i = 0; i < str.length; i++) {\n    var x = str.charCodeAt(i) ^ key;\n    out += (x < 16 ? \"0\" : \"\") + x.toString(16);\n  }\n  return out;\n}\nfunction transform(ctx) {\n  var ip = ctx.local_ip || \"\";\n  if (!ip) {\n    throw new Error(\"无法获取本机 IP（ctx.local_ip 为空），请确认已连接校园网\");\n  }\n  var key = 0;\n  for (var i = 0; i < ip.length; i++) {\n    key ^= ip.charCodeAt(i);\n  }\n  return {\n    callback: xorHex(\"dr1003\", key),\n    login_method: xorHex(\"1\", key),\n    user_account: xorHex(\",0,\" + (ctx.username || \"\"), key),\n    user_password: xorHex(ctx.password || \"\", key),\n    wlan_user_ip: xorHex(ip, key),\n    wlan_user_ipv6: \"\",\n    wlan_user_mac: \"\",\n    wlan_ac_ip: \"\",\n    wlan_ac_name: \"\",\n    jsVersion: xorHex(\"4.2.1\", key),\n    terminal_type: xorHex(\"1\", key),\n    lang: xorHex(\"zh-cn\", key),\n    v: String(Math.floor(Math.random() * 9000) + 1000)\n  };\n}",
+  "crypto_script": "// ================= 运营商 → 账号后缀映射（可按门户要求自行增删改） =================\n// 方案的「运营商」字段取值：预设 移动 / 联通 / 电信；选「自定义」时是输入的关键字。\n// 映射不到的值按「关键字 → @关键字」处理（已带 @ 则原样使用）；账号为空不追加。\nvar ISP_SUFFIX = {\n  \"移动\": \"@cmcc\",\n  \"联通\": \"@unicom\",\n  \"电信\": \"@telecom\",\n  \"校园网\": \"@xyw\"\n};\n\n// ================= Dr.COM eportal（dr1003，encrypt=1）字段加密 =================\n// 密钥 = 本机 IP 逐字符异或；各字段字符再与密钥异或后转两位十六进制。\nfunction xorHex(str, key) {\n  var out = \"\";\n  for (var i = 0; i < str.length; i++) {\n    var x = str.charCodeAt(i) ^ key;\n    out += (x < 16 ? \"0\" : \"\") + x.toString(16);\n  }\n  return out;\n}\nfunction transform(ctx) {\n  var ip = ctx.local_ip || \"\";\n  if (!ip) {\n    throw new Error(\"无法获取本机 IP（ctx.local_ip 为空），请确认已连接校园网\");\n  }\n  var key = 0;\n  for (var i = 0; i < ip.length; i++) {\n    key ^= ip.charCodeAt(i);\n  }\n\n  var suffix = \"\";\n  var isp = (ctx.isp || \"\").trim();\n  if (isp) {\n    suffix = ISP_SUFFIX[isp] !== undefined ? ISP_SUFFIX[isp] : (isp.charAt(0) === \"@\" ? isp : \"@\" + isp);\n  }\n  // 账号里已含 @（手动写后缀的旧用法）时不再追加，避免出现 @cmcc@cmcc\n  var user = ctx.username || \"\";\n  if (user.indexOf(\"@\") >= 0) suffix = \"\";\n\n  return {\n    callback: xorHex(\"dr1003\", key),\n    login_method: xorHex(\"1\", key),\n    user_account: xorHex(\",0,\" + user + suffix, key),\n    user_password: xorHex(ctx.password || \"\", key),\n    wlan_user_ip: xorHex(ip, key),\n    wlan_user_ipv6: \"\",\n    wlan_user_mac: \"\",\n    wlan_ac_ip: \"\",\n    wlan_ac_name: \"\",\n    jsVersion: xorHex(\"4.2.1\", key),\n    terminal_type: xorHex(\"1\", key),\n    lang: xorHex(\"zh-cn\", key),\n    v: String(Math.floor(Math.random() * 9000) + 1000)\n  };\n}",
   "ignore_https_errors": null,
   "metadata": {
     "author": "Misyra",
@@ -18,5 +18,6 @@
     "device": "Dr.COM eportal（dr1003）",
     "protocol": "GET /eportal/portal/login（encrypt=1）：密钥 = 本机 IP 逐字符异或，字段值 = 字符逐个与密钥异或的两位十六进制",
     "source": "自用 login.sh（OpenWrt/busybox 实测脚本）移植"
-  }
+  },
+  "version": "1.1.0"
 }
