@@ -107,6 +107,8 @@ Move-Item -Path "temp/hust.json" -Destination "tasks/hust.json"
 
 三类任务都写入 `index.json`，且必须显式写 `type`：`browser`、`http` 或 `script`。脚本任务需内嵌 Python 正文，不得依赖作者本机路径；重点审查凭据读取与网络请求去向。
 
+tags 不写任务类型（「直连」「浏览器」由 `type` 表达），约定首个为中文校名、第二个为学校英文缩写（如 BUAA、HUST），其后为认证系统或厂商。
+
 在对应索引的数组末尾添加条目，`url` 指向 `tasks/` 中的文件。如提供门户截图（非必需，仅浏览器任务），可附带 `screenshot` 字段：
 
 ```json
@@ -114,7 +116,7 @@ Move-Item -Path "temp/hust.json" -Destination "tasks/hust.json"
   "id": "hust",
   "name": "华中科技大学校园网登录",
   "description": "适用于华中科技大学 Dr.COM Portal 认证页面，需先点击密码占位元素激活密码输入框",
-  "tags": ["华中科技大学", "Dr.COM"],
+  "tags": ["华中科技大学", "HUST"],
   "author": "your-github-username",
   "version": "1.0.0",
   "type": "browser",
@@ -129,7 +131,7 @@ HTTP 登录任务写 `"type": "http"`，改编来源 `source` 可选。任务文
   "id": "haust",
   "name": "河南科技大学校园网直连（大学掌体系）",
   "description": "直连渠道：先取 CSRF 令牌再 POST 登录，令牌绑定连接。适用于河南科技大学（裕达 / 大学掌 Portal）",
-  "tags": ["河南科技大学", "大学掌", "直连"],
+  "tags": ["河南科技大学", "HAUST", "大学掌"],
   "author": "heragehome",
   "version": "1.0.0",
   "type": "http",
@@ -159,7 +161,7 @@ HTTP 登录任务写 `"type": "http"`，改编来源 `source` 可选。任务文
   "id": "hust",
   "name": "华中科技大学校园网登录",
   "description": "适用于华中科技大学 Dr.COM Portal 认证页面，需先点击密码占位元素激活密码输入框",
-  "tags": ["华中科技大学", "Dr.COM"],
+  "tags": ["华中科技大学", "HUST"],
   "author": "your-github-username",
   "version": "1.0.0",
   "type": "browser",

@@ -98,7 +98,7 @@ Campus-Auth 的校园网登录任务共享仓库。
      "id": "xxx_university",
      "name": "XXX大学登录",
      "description": "适用于 XXX 大学校园网认证页面",
-     "tags": ["你的学校名", "认证系统型号"],
+     "tags": ["你的学校名", "学校缩写", "认证系统型号"],
      "author": "你的GitHub用户名",
      "version": "1.0.0",
      "type": "browser",
@@ -111,7 +111,7 @@ Campus-Auth 的校园网登录任务共享仓库。
      "id": "xxx_university",
      "name": "XXX大学直连登录",
      "description": "直连渠道：先取令牌再 POST 登录，适用于 XXX 大学（设备型号）",
-     "tags": ["你的学校名", "直连"],
+     "tags": ["你的学校名", "学校缩写"],
      "author": "你的GitHub用户名",
      "version": "1.0.0",
      "type": "http",
@@ -119,6 +119,7 @@ Campus-Auth 的校园网登录任务共享仓库。
      "url": "https://raw.githubusercontent.com/Misyra/campus-auth-tasks/master/tasks/xxx_university.json"
    }
    ```
+   tags 约定：不要写「直连」「浏览器」等类型标签（类型由 `type` 字段表达），首个为中文校名，第二个为学校英文缩写（如 BUAA、HUST），其后为认证系统或厂商。
 5. 运行 `python tools/build-index.py` 生成镜像与兼容索引，再运行 `python tools/build-index.py --check` 校验
 6. （可选，仅浏览器任务）如需提供门户截图：将截图转为 WebP 后放入 `snap/` 目录，遮挡个人信息，并在 `index.json` 添加 GitHub raw `screenshot`；生成工具会转换镜像地址
 
