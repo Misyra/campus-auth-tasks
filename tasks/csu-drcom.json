@@ -1,0 +1,50 @@
+{
+  "type": "http",
+  "task_id": "csu-drcom",
+  "name": "中南大学校园网直连（Dr.COM 表单·动态 IP）",
+  "description": "适用于中南大学升华公寓区 Dr.COM 门户的直连登录：先访问 http://pingtcss.qq.com/，从被网关劫持的响应里正则提取 v4serip 作为登录 IP，再 POST 经典表单（账号按原仓库口径为「02+学号@zndx」，联通出口）。若前置请求取不到登录 IP，把登录地址里的 {nip} 直接替换为校内通知的登录服务器 IP；账号口径不符时改「准备账号」步骤。与 csu-eportal（10.1.1.1:802）是两套不同部署。改编自 MonoLogueChi/Drcom（MIT），未在校园网环境实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "probe",
+      "name": "探测登录 IP",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://pingtcss.qq.com/",
+      "extracts": [
+        {
+          "source": "regex:v4serip='?([^'\"&\\s]+)",
+          "name": "nip"
+        }
+      ],
+      "on_error": "continue"
+    },
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  if (!ctx.vars.nip) throw new Error(\"未能从探测响应提取 v4serip，请把登录地址中的 {nip} 替换为校内登录服务器 IP 后删掉本提示\");\n  return { form_username: url_encode(\"02\" + (ctx.username || \"\") + \"@zndx\"), form_password: url_encode(ctx.password || \"\") };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "POST",
+      "url": "http://{nip}/",
+      "headers": "Content-Type: application/x-www-form-urlencoded",
+      "body": "DDDDD={form_username}&upass={form_password}&0MKKey=Login&Submit=%E7%99%BB+%E5%BD%95"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "MonoLogueChi",
+    "school": "中南大学",
+    "device": "Dr.COM 经典表单（动态登录 IP）",
+    "protocol": "GET 探测 v4serip → POST http://{nip}/（DDDDD=02+学号@zndx，明文）",
+    "source": "https://github.com/MonoLogueChi/Drcom",
+    "license": "MIT"
+  },
+  "version": "1.0.0"
+}

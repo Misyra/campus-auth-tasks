@@ -1,0 +1,56 @@
+{
+  "type": "http",
+  "task_id": "uestc",
+  "name": "电子科技大学校园网直连（深澜 SRUN）",
+  "description": "适用于电子科技大学深澜门户（10.253.0.235）的直连登录，标准 get_challenge → 签名 → srun_portal 流程。默认 ac_id=3 为原仓库的寝室公寓配置，主楼等区域可能需要改成 1（改「计算深澜签名」步骤开头的 acId）。方案的「运营商」字段映射：移动→@cmcc、电信→@dx、校园网→@dx-uestc，映射表写在「准备账号」步骤开头可改。登录附带原仓库 _send_login_info 的 os=Windows 10 / name=Windows / double_stack=0 参数。改编自 b71db892/AutoLoginUESTC（MIT），未在校园网环境实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var MAP = {\"移动\": \"@cmcc\", \"电信\": \"@dx\", \"校园网\": \"@dx-uestc\"};\n  var suffix = \"\";\n  var isp = (ctx.isp || \"\").trim();\n  if (isp) { suffix = MAP[isp] !== undefined ? MAP[isp] : (isp.charAt(0) === \"@\" ? isp : \"\"); }\n  var full = (ctx.username || \"\") + suffix;\n  return { full_username: full, encoded_username: url_encode(full), callback: \"jsonp\" + Math.floor(now_ms()) };\n}"
+    },
+    {
+      "id": "challenge",
+      "name": "获取 challenge",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://10.253.0.235/cgi-bin/get_challenge?callback={callback}&username={encoded_username}&ip={local_ip}",
+      "extracts": [
+        {
+          "source": "regex:\"challenge\"\\s*:\\s*\"([^\"]+)\"",
+          "name": "challenge"
+        }
+      ]
+    },
+    {
+      "id": "sign",
+      "name": "计算深澜签名",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var acId = \"3\";\n  var n = \"200\";\n  var type = \"1\";\n  var ip = ctx.local_ip;\n  if (!ip) throw new Error(\"无法获取本机 IP，请确认已连接校园网\");\n  var token = ctx.vars.challenge;\n  var full = ctx.vars.full_username || (ctx.username || \"\");\n  var info = srun_info(JSON.stringify({ username: full, password: ctx.password, ip: ip, acid: acId, enc_ver: \"srun_bx1\" }), token);\n  var hmd5 = hmac_md5(token, ctx.password);\n  var checksum = sha1(token + full + token + hmd5 + token + acId + token + ip + token + n + token + type + token + info);\n  return { encoded_username: url_encode(full), encoded_password: url_encode(\"{MD5}\" + hmd5), encoded_info: url_encode(info), checksum: checksum, ac_id: acId, n: n, protocol_type: type, login_ip: ip };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://10.253.0.235/cgi-bin/srun_portal?callback={callback}&action=login&username={encoded_username}&password={encoded_password}&ac_id={ac_id}&ip={login_ip}&chksum={checksum}&info={encoded_info}&n={n}&type={protocol_type}&os=Windows%2010&name=Windows&double_stack=0",
+      "headers": "Accept: application/json, text/javascript, */*"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "failure_pattern": "\"error\":\"login_error\"",
+  "failure_action": "credential",
+  "metadata": {
+    "author": "b71db892",
+    "school": "电子科技大学",
+    "device": "深澜 SRUN BX1",
+    "protocol": "get_challenge → {MD5}+HMAC-MD5 / srun_info / SHA1 chksum → srun_portal",
+    "source": "https://github.com/b71db892/AutoLoginUESTC",
+    "license": "MIT"
+  },
+  "version": "1.0.0"
+}

@@ -2,7 +2,7 @@
 
 ## 流程概览
 
-安全审查 → 格式修正 → 放入 `temp/`（待审核）→ 确认后移至 `tasks/` → 更新**对应类型的索引**及其 Gitee 镜像（浏览器任务：`index.json` + `index.gitee.json`；直连任务：`index.http.json` + `index.http.gitee.json`，可选附门户截图）→ 提交
+安全审查 → 格式修正 → 放入 `temp/`（待审核）→ 确认后移至 `tasks/` → 更新统一 `index.json`（显式填写 browser/http/script 类型）→ 运行 `python tools/build-index.py` 生成镜像与旧版 HTTP 兼容索引 → 提交
 
 ## 适用场景
 
@@ -90,7 +90,7 @@ Move-Item -Path "task.json" -Destination "temp/hust.json"
 - 文件名须匹配 `id` 字段
 
 **ID 冲突处理：**
-- 如果 `id` 已存在于对应类型的索引（浏览器任务 `index.json`、直连任务 `index.http.json`）中，先读取已有任务文件对比内容
+- 如果 `id` 已存在于 `index.json` 的任一类型中，先读取已有任务文件对比内容；三类任务共用 ID 空间
 - **相同任务**（同一学校、同一认证系统）：更新现有文件，不创建新条目
 - **不同任务**（不同学校或不同认证系统）：询问用户如何区分，建议修改 `id`（如加后缀 `_v2`、`_new` 或校区名）
 - **无法判断**：向用户展示两个任务的差异，由用户决定
@@ -103,9 +103,9 @@ Move-Item -Path "task.json" -Destination "temp/hust.json"
 Move-Item -Path "temp/hust.json" -Destination "tasks/hust.json"
 ```
 
-### Step 6: 更新对应类型的索引
+### Step 6: 更新统一索引
 
-**浏览器任务写入 `index.json`，直连任务写入 `index.http.json`** —— 两类任务各有一份索引，放错文件会让条目在 App 里「列表里看不见」或「看得见但导入被拒」。
+三类任务都写入 `index.json`，且必须显式写 `type`：`browser`、`http` 或 `script`。脚本任务需内嵌 Python 正文，不得依赖作者本机路径；重点审查凭据读取与网络请求去向。
 
 在对应索引的数组末尾添加条目，`url` 指向 `tasks/` 中的文件。如提供门户截图（非必需，仅浏览器任务），可附带 `screenshot` 字段：
 
@@ -117,11 +117,12 @@ Move-Item -Path "temp/hust.json" -Destination "tasks/hust.json"
   "tags": ["华中科技大学", "Dr.COM"],
   "author": "your-github-username",
   "version": "1.0.0",
+  "type": "browser",
   "url": "https://raw.githubusercontent.com/Misyra/campus-auth-tasks/master/tasks/hust.json"
 }
 ```
 
-直连任务的条目额外带 `type`（固定 `"http"`）与 `source`（改编来源，没有可省）：
+HTTP 登录任务写 `"type": "http"`，改编来源 `source` 可选。任务文件中的可编辑流程使用 `schema_version: 2`、有序 `steps` 与 `result_step_id`；提交前应在新版应用中测试并导出，旧版固定字段继续可导入：
 
 ```json
 {
@@ -143,15 +144,15 @@ Move-Item -Path "temp/hust.json" -Destination "tasks/hust.json"
 
 - 截图须为 WebP 格式（Gitee 镜像对 AVIF 返回的 MIME 会导致图片无法显示，WebP 已实测双端正常）：提交前转换，如 `ffmpeg -y -i snap/hust.png -q:v 80 snap/hust.webp`，转完后删除源文件
 - 截图前请遮挡账号、密码、验证码等个人信息
-- 在 `index.json` / `index.gitee.json` 的对应条目中添加 `screenshot` 字段，分别指向 GitHub / Gitee raw 地址，例如：
+- 在 `index.json` 的对应条目中添加 GitHub raw `screenshot` 字段，生成工具会转换镜像地址，例如：
 
 ```json
 "screenshot": "https://raw.githubusercontent.com/Misyra/campus-auth-tasks/master/snap/hust.webp"
 ```
 
-### Step 6b: 同步镜像索引
+### Step 6b: 生成镜像与兼容索引
 
-本仓库为**每份索引**各维护了一个 Gitee 镜像索引，供国内用户使用：`index.json` → `index.gitee.json`，`index.http.json` → `index.http.gitee.json`。在对应的镜像索引中添加相同条目，仅将 `url` 切换为 Gitee raw 地址：
+运行 `python tools/build-index.py`，再运行 `python tools/build-index.py --check`。工具会从 `index.json` 生成 `index.gitee.json`、旧版 HTTP 兼容索引 `index.http.json` 与 `index.http.gitee.json`，不要手工编辑生成文件。
 
 ```json
 {
@@ -161,6 +162,7 @@ Move-Item -Path "temp/hust.json" -Destination "tasks/hust.json"
   "tags": ["华中科技大学", "Dr.COM"],
   "author": "your-github-username",
   "version": "1.0.0",
+  "type": "browser",
   "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/hust.json"
 }
 ```
@@ -174,12 +176,11 @@ Move-Item -Path "temp/hust.json" -Destination "tasks/hust.json"
 ### Step 7: 提交
 
 ```powershell
-git add tasks/hust.json index.json index.gitee.json
+git add tasks/hust.json index.json index.gitee.json index.http.json index.http.gitee.json
 git commit -m "feat: 添加华中科技大学校园网登录任务"
 git push origin master && git push gitee master
 ```
 
-> 直连任务把那两行索引文件名换成 `index.http.json` / `index.http.gitee.json`。
 > **注意：** 提交中不需要包含 `temp/` 下的文件（已移至 `tasks/`），也不需要包含 `doc/`（编写指南不属于任务提交内容）。
 > 镜像索引（`index.gitee.json` / `index.http.gitee.json`）需同步提交并在两边 remote 都推送。
 > 如提供了门户截图，一并 `git add snap/hust.webp`（截图须与 `screenshot` 字段路径一致）。
@@ -187,16 +188,13 @@ git push origin master && git push gitee master
 ## 验证清单
 
 - [ ] JSON 语法正确
-- [ ] 所有 `eval` 脚本已审查、无风险（`custom_js` 已合并到 `eval`，`code` 已改为 `script`）
-- [ ] `url` 为 `"{{LOGIN_URL}}"` 或省略
-- [ ] `index.json` / `index.http.json` 是合法 JSON，且条目放进了**对应类型**的那份
+- [ ] 浏览器任务：所有 `eval` 脚本已审查；`url` 为 `"{{LOGIN_URL}}"` 或省略
+- [ ] `index.json` 是合法 JSON，每个条目有合法的 `type`，且运行 `python tools/build-index.py --check` 通过
 - [ ] 对应的镜像索引是合法 JSON（URL 为 Gitee raw 地址）
 - [ ] 文件名、`id` 字段、索引里的 `url` 三者一致
 - [ ] `tasks/` 下有对应文件，`temp/` 下无残留
 - [ ] ID 命名使用学校缩写（如可用）
 - [ ] 描述清晰且未包含无证据的猜测
-- [ ] **已确认学校信息**：`metadata.school` 已通过用户确认（或标注为"未知"）
-- [ ] **已确认设备型号**：`metadata.device` 已通过用户确认（或标注为"未知"）
-- [ ] `metadata.author` 已填写（用户确认或"anonymous"）
-- [ ] 直连任务：条目带 `"type": "http"`，且只出现在 `index.http.json` / `index.http.gitee.json`
+- [ ] 浏览器任务：`metadata.school`、`metadata.device` 已由用户确认（或标注为"未知"），`metadata.author` 已填写
+- [ ] HTTP 登录任务：条目带 `"type": "http"`，新版步骤任务已测试并导出；脚本任务：条目带 `"type": "script"` 且经代码审查
 - [ ] 如提供门户截图（非必需，仅浏览器任务）：已放入 `snap/` 且文件名与 `id` 一致，已遮挡个人信息，两份**浏览器**索引的 `screenshot` 字段均已添加且地址正确

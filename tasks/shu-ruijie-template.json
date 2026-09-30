@@ -1,0 +1,45 @@
+{
+  "type": "http",
+  "task_id": "shu-ruijie-template",
+  "name": "上海大学锐捷 ePortal 模板（需校验）",
+  "description": "据 shu-net-keeper 的上海大学部署流程改写：先跟随网关跳转，从页面脚本获取 queryString/MAC，再以固定公钥加密 password>mac 并提交。导入后须核对当前门户地址、页面字段、公钥与响应；未在校园网环境实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "portal",
+      "name": "获取门户参数",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://10.10.9.9/",
+      "extracts": [
+        { "source": "regex:location\\.href='[^']*\\?([^']+)'", "name": "query_string" },
+        { "source": "regex:mac=([^&']+)", "name": "mac" }
+      ]
+    },
+    {
+      "id": "encrypt",
+      "name": "计算锐捷密码",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  const encrypted = shu_ruijie_password(ctx.password, ctx.vars.mac);\n  return { form_user: url_encode(ctx.username), form_password: url_encode(encrypted), form_query: url_encode(url_encode(ctx.vars.query_string)) };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交 ePortal 登录",
+      "kind": "request",
+      "method": "POST",
+      "url": "http://10.10.9.9/eportal/InterFace.do?method=login",
+      "headers": "Content-Type: application/x-www-form-urlencoded\nAccept: */*\nReferer: http://10.10.9.9/eportal/index.jsp?{query_string}",
+      "body": "userId={form_user}&password={form_password}&service=shu&passwordEncrypt=true&operatorPwd=&operatorUserId=&validcode=&queryString={form_query}"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "Misyra",
+    "school": "上海大学（来源部署）",
+    "device": "锐捷 ePortal passwordEncrypt",
+    "source": "https://github.com/BeiningWu/shu-net-keeper"
+  },
+  "version": "1.0.0"
+}

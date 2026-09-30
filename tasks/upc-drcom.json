@@ -1,0 +1,36 @@
+{
+  "type": "http",
+  "task_id": "upc-drcom",
+  "name": "中国石油大学（华东）校园网直连（Dr.COM 表单·无线）",
+  "description": "适用于中国石油大学（华东）UPC 无线网（172.16.4.3）的直连登录：POST 经典表单，密码按原实现变形为 MD5(\"1\"+密码+\"12345678\") 后接 \"123456781\"。宿舍区有线的 eportal ACSetting 通道（222.195.191.230:801，账号@upc）未收录，有线用户改用 upc 任务或按原仓库抓包补充。改编自 upclinux/DrUPC（GPL-2.0），随本仓库以 AGPL-3.0 分发，未实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "变形密码",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var pwd = ctx.password || \"\";\n  return { form_username: url_encode(ctx.username || \"\"), form_password: md5(\"1\" + pwd + \"12345678\") + \"12345678\" + \"1\" };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "POST",
+      "url": "http://172.16.4.3/",
+      "headers": "Content-Type: application/x-www-form-urlencoded",
+      "body": "DDDDD={form_username}&upass={form_password}&R1=0&R2=1&para=00&0MKKey=123456"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "upclinux",
+    "school": "中国石油大学（华东）",
+    "device": "Dr.COM 经典表单（MD5 变形密码）",
+    "protocol": "POST http://172.16.4.3/：upass = MD5(\"1\"+密码+\"12345678\")+\"12345678\"+\"1\"",
+    "source": "https://github.com/upclinux/DrUPC",
+    "license": "GPL-2.0"
+  },
+  "version": "1.0.0"
+}

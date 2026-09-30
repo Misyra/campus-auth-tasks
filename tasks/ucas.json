@@ -1,0 +1,50 @@
+{
+  "type": "http",
+  "task_id": "ucas",
+  "name": "中国科学院大学校园网直连（锐捷 ePortal 明文）",
+  "description": "适用于中国科学院大学（国科大）校园网门户（210.77.16.21）的直连登录：先 GET 门户取跳转地址并解析出 queryString，再 POST /eportal/InterFace.do?method=login 明文表单（service 传空（固定，不随运营商变化），无 passwordEncrypt 字段，均按原实现）。若响应提示「用户未确认网络协议书」，先在门户网页确认一次协议。改编自 GentleCP/UCAS-Helper（GPL-3.0），随本仓库以 AGPL-3.0 分发，未实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "probe",
+      "name": "取门户跳转地址",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://210.77.16.21/",
+      "extracts": [
+        {
+          "source": "header:Location",
+          "name": "portal_url"
+        }
+      ],
+      "stop_on_redirect": true
+    },
+    {
+      "id": "prepare",
+      "name": "解析 queryString",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var u = ctx.vars.portal_url || \"\";\n  if (!u || u.indexOf(\"?\") < 0) throw new Error(\"未能获取门户跳转地址（Location），请核对本校门户地址后把地址写进本步骤脚本\");\n  var q = u.slice(u.indexOf(\"?\") + 1);\n  var host = u.split(\"/\")[2];\n  var service = \"\"; // 原实现 core/wifi.py login_wifi: service 固定传空，与运营商无关\n  return { portal_host: host, qse: url_encode(q), eu: url_encode(ctx.username || \"\"), ep: url_encode(ctx.password || \"\"), es: url_encode(service) };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "POST",
+      "url": "http://{portal_host}/eportal/InterFace.do?method=login",
+      "headers": "Content-Type: application/x-www-form-urlencoded",
+      "body": "userId={eu}&password={ep}&service={es}&queryString={qse}&operatorPwd=&operatorUserId=&validcode="
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "GentleCP",
+    "school": "中国科学院大学",
+    "device": "锐捷 ePortal（InterFace.do，明文）",
+    "protocol": "GET 210.77.16.21 取跳转 query → POST /eportal/InterFace.do?method=login（service 空，无 passwordEncrypt 字段）",
+    "source": "https://github.com/GentleCP/UCAS-Helper",
+    "license": "GPL-3.0"
+  },
+  "version": "1.0.0"
+}

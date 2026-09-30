@@ -1,0 +1,36 @@
+{
+  "type": "http",
+  "task_id": "cqnu",
+  "name": "重庆师范大学校园网直连（Dr.COM 表单）",
+  "description": "适用于重庆师范大学校园网（10.0.251.18:801）的直连登录：POST /eportal/?c=ACSetting&a=Login 提交明文表单（DDDDD=,0,学号+后缀）。运营商后缀按原 README：电信→telecom、校园网→xyw（原 README 另提到校园网可删后缀，两种口径改「准备账号」步骤核对）。若门户提示登录态问题，按原仓库补 ISP_select / md5_login2 Cookie。改编自 smartzzx/drcom-web-CQNU（AGPL-3.0），随本仓库以 AGPL-3.0 分发，未实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var MAP = { \"电信\": \"telecom\", \"校园网\": \"xyw\" };\n  var isp = (ctx.isp || \"\").trim();\n  var s = isp ? (MAP[isp] !== undefined ? MAP[isp] : (isp.charAt(0) === \"@\" ? isp.substring(1) : \"\")) : \"\";\n  var full = (ctx.username || \"\") + (s ? \"@\" + s : \"\");\n  return { ua: url_encode(\",0,\" + full), ep: url_encode(ctx.password || \"\") };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "POST",
+      "url": "http://10.0.251.18:801/eportal/?c=ACSetting&a=Login&protocol=http:&hostname=10.0.251.18&iTermType=1&wlanacip=null&wlanacname=null&mac=00-00-00-00-00-00&enAdvert=0&queryACIP=0&loginMethod=1",
+      "headers": "Content-Type: application/x-www-form-urlencoded",
+      "body": "DDDDD={ua}&upass={ep}&R1=0&R2=0&R3=0&R6=0&para=00&0MKKey=123456&buttonClicked=&redirect_url=&err_flag=&username=&password=&user=&cmd=&Login=&v6ip="
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "smartzzx",
+    "school": "重庆师范大学",
+    "device": "Dr.COM eportal（ACSetting，明文）",
+    "protocol": "POST :801/eportal/?c=ACSetting&a=Login（DDDDD=,0,学号@后缀，明文）",
+    "source": "https://github.com/smartzzx/drcom-web-CQNU",
+    "license": "AGPL-3.0"
+  },
+  "version": "1.0.0"
+}

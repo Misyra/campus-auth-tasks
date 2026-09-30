@@ -1,0 +1,36 @@
+{
+  "type": "http",
+  "task_id": "nuist",
+  "name": "南京信息工程大学校园网直连（自建门户 JSON）",
+  "description": "适用于南京信息工程大学校园网（a.nuist.edu.cn）的直连登录：POST /index.php/index/login 表单，密码 base64 编码后再按表单编码提交（base64 里的 + / = 原样放表单会被服务端解错），运营商经 domain 字段提交（校园网→NUIST、移动→CMCC、电信→ChinaNet、联通→Unicom，选「自定义」时填写的关键字原样提交），enablemacauth=0。改编自 Alrash/WebAuthenticate（MIT），未在校园网环境实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var MAP = { \"校园网\": \"NUIST\", \"移动\": \"CMCC\", \"电信\": \"ChinaNet\", \"联通\": \"Unicom\" };\n  var isp = (ctx.isp || \"\").trim();\n  var domain = isp ? (MAP[isp] !== undefined ? MAP[isp] : isp) : \"NUIST\";\n  return { form_username: url_encode(ctx.username || \"\"), form_password: url_encode(base64_encode(ctx.password || \"\")), domain_val: url_encode(domain) };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "POST",
+      "url": "http://a.nuist.edu.cn/index.php/index/login",
+      "headers": "Content-Type: application/x-www-form-urlencoded",
+      "body": "username={form_username}&domain={domain_val}&password={form_password}&enablemacauth=0"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "Alrash",
+    "school": "南京信息工程大学",
+    "device": "自建门户（JSON 接口）",
+    "protocol": "GET /index.php/index/init → POST /index/login（password=base64，domain=运营商）",
+    "source": "https://github.com/Alrash/WebAuthenticate",
+    "license": "MIT"
+  },
+  "version": "1.0.0"
+}

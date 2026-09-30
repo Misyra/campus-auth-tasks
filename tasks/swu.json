@@ -1,0 +1,49 @@
+{
+  "type": "http",
+  "task_id": "swu",
+  "name": "西南大学校园网直连（锐捷 ePortal 明文）",
+  "description": "适用于西南大学锐捷 Web 认证的直连登录：先访问 captive.apple.com 探测地址，从跳转页 href 提取门户地址（主机动态），再 POST /eportal/InterFace.do?method=login 明文表单，service 固定为门户的「默认」（原实现经 url.Values.Encode() 双重编码），queryString 按原实现先按参数名排序再单重编码。原仓库的可选 RSA 加密模式（passwordEncrypt=true）未收录，默认明文可直接用；若门户要求加密则本任务不适用。改编自 AlchemyHAN/SWU-Network-Pass（GPL-3.0），随本仓库以 AGPL-3.0 分发，未实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "probe",
+      "name": "探测门户",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://captive.apple.com/",
+      "extracts": [
+        {
+          "source": "regex:href='([^']+)",
+          "name": "portal_url"
+        }
+      ]
+    },
+    {
+      "id": "prepare",
+      "name": "解析 queryString",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var u = ctx.vars.portal_url || \"\";\n  if (!u || u.indexOf(\"?\") < 0) throw new Error(\"未能获取门户跳转地址（Location），请核对本校门户地址后把地址写进本步骤脚本\");\n  var q = u.slice(u.indexOf(\"?\") + 1);\n  var host = u.split(\"/\")[2];\n  // login.go L26-27：redirectUrl.Query().Encode() 会把参数按 key 字母序排序\n  var pairs = q.split(\"&\").map(function (p) { return p.split(\"=\"); });\n  pairs.sort(function (a, b) { return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0; });\n  var qs = pairs.map(function (p) { return p.join(\"=\"); }).join(\"&\");\n  var service = \"默认\"; // login.go L24：固定 service=%E9%BB%98%E8%AE%A4，运营商由 IP 段检测决定，不经 service\n  return { portal_host: host, qse: url_encode(qs), eu: url_encode(ctx.username || \"\"), ep: url_encode(ctx.password || \"\"), es: url_encode(url_encode(service)) };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "POST",
+      "url": "http://{portal_host}/eportal/InterFace.do?method=login",
+      "headers": "Content-Type: application/x-www-form-urlencoded",
+      "body": "userId={eu}&password={ep}&service={es}&queryString={qse}&operatorPwd=&operatorUserId=&validcode=&passwordEncrypt=false"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "AlchemyHAN",
+    "school": "西南大学",
+    "device": "锐捷 ePortal（InterFace.do，明文）",
+    "protocol": "captive.apple.com 探测取跳转 href → POST {host}/eportal/InterFace.do?method=login（service=默认）",
+    "source": "https://github.com/AlchemyHAN/SWU-Network-Pass",
+    "license": "GPL-3.0"
+  },
+  "version": "1.0.0"
+}

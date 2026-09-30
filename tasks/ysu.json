@@ -1,0 +1,49 @@
+{
+  "type": "http",
+  "task_id": "ysu",
+  "name": "燕山大学校园网直连（锐捷 ePortal 明文）",
+  "description": "适用于燕山大学校园网门户（auth.ysu.edu.cn）的直连登录：先 GET 门户首页，按原实现的正则从跳转链接提取查询串（从 wlanacname 截起、保留结尾单引号，与 NetLogin.cs 的整匹配截取一致），再 POST /eportal/InterFace.do?method=login 明文表单；queryString 与 service（门户侧预编码字符串）均按原实现双重 URL 编码。运营商映射：校园网→校园网、移动→中国移动、联通→中国联通、电信→中国电信。改编自 cyjin-yl/YSUNetLogin（GPL-2.0），随本仓库以 AGPL-3.0 分发，未实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "probe",
+      "name": "探测门户",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://auth.ysu.edu.cn/",
+      "extracts": [
+        {
+          "source": "regex:href='https://auth\\.ysu\\.edu\\.cn:8443/eportal/index\\.jsp\\?([^']*)'",
+          "name": "qs_full"
+        }
+      ]
+    },
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var qs_full = ctx.vars.qs_full || \"\";\n  var idx = qs_full.indexOf(\"wlanacname\");\n  if (!qs_full || idx < 0) throw new Error(\"未能从门户首页提取认证跳转查询串（原实现要求链接含 wlanacname 参数），请核对门户地址\");\n  var qs = qs_full.substring(idx) + \"'\"; // NetLogin.cs L139-141：取整个正则匹配值（含结尾单引号）再 Substring(IndexOf(\"wlanacname\"))\n  // NetLogin.cs L12-17：serviceStrings 为门户侧预编码字符串，经 FormUrlEncodedContent 再编码一次 => 双重编码\n  var MAP = { \"校园网\": \"%e6%a0%a1%e5%9b%ad%e7%bd%91\", \"移动\": \"%E4%B8%AD%E5%9B%BD%E7%A7%BB%E5%8A%A8\", \"联通\": \"%e4%b8%ad%e5%9b%bd%e8%81%94%e9%80%9a\", \"电信\": \"%e4%b8%ad%e5%9b%bd%e7%94%b5%e4%bf%a1\" };\n  var isp = (ctx.isp || \"\").trim();\n  var service = isp ? (MAP[isp] !== undefined ? MAP[isp] : isp) : MAP[\"校园网\"];\n  return { eu: url_encode(ctx.username || \"\"), ep: url_encode(ctx.password || \"\"), es: url_encode(service), qse: url_encode(url_encode(qs)) };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "POST",
+      "url": "http://auth.ysu.edu.cn/eportal/InterFace.do?method=login",
+      "headers": "Content-Type: application/x-www-form-urlencoded",
+      "body": "userId={eu}&password={ep}&service={es}&queryString={qse}&operatorPwd=&operatorUserId=&validcode=&passwordEncrypt=false"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "cyjin-yl",
+    "school": "燕山大学",
+    "device": "锐捷 ePortal（InterFace.do，明文）",
+    "protocol": "GET auth.ysu.edu.cn 取 index.jsp 查询串 → POST /eportal/InterFace.do?method=login",
+    "source": "https://github.com/cyjin-yl/YSUNetLogin",
+    "license": "GPL-2.0"
+  },
+  "version": "1.0.0"
+}

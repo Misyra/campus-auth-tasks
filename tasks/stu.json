@@ -1,0 +1,36 @@
+{
+  "type": "http",
+  "task_id": "stu",
+  "name": "汕头大学校园网直连（H3C ac_portal 明文）",
+  "description": "适用于汕头大学校园网门户（a.stu.edu.cn）的直连登录：单步 POST /ac_portal/login.php（opr=pwdLogin，明文账号密码，rememberPwd=1）。xuzhihaoup/STUnet_connect 为同一门户的等价实现，一并致谢。改编自 HEX9CF/CupidConnector（GPL-3.0），随本仓库以 AGPL-3.0 分发，未实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  return { eu: url_encode(ctx.username || \"\"), ep: url_encode(ctx.password || \"\") };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "POST",
+      "url": "https://a.stu.edu.cn/ac_portal/login.php",
+      "headers": "Content-Type: application/x-www-form-urlencoded",
+      "body": "opr=pwdLogin&userName={eu}&pwd={ep}&rememberPwd=1"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "HEX9CF",
+    "school": "汕头大学",
+    "device": "H3C ac_portal（明文）",
+    "protocol": "POST https://a.stu.edu.cn/ac_portal/login.php（opr=pwdLogin，明文）",
+    "source": "https://github.com/HEX9CF/CupidConnector",
+    "license": "GPL-3.0"
+  },
+  "version": "1.0.0"
+}

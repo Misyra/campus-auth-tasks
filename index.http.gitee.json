@@ -28,5 +28,772 @@
     "version": "1.1.1",
     "type": "http",
     "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/jcu-drcom-eportal.json"
+  },
+  {
+    "id": "srun-bx1-template",
+    "name": "深澜 SRUN BX1 登录模板（需设置网关）",
+    "description": "challenge + HMAC-MD5 + srun_info + SHA1 的 HTTP 登录模板。导入后必须修改认证网关并核对 ac_id 等参数；尚未针对具体学校验证。",
+    "tags": [
+      "深澜",
+      "SRUN",
+      "HTTP 模板"
+    ],
+    "author": "Misyra",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/Anchor-GitHu/luci-app-srun-login",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/srun-bx1-template.json"
+  },
+  {
+    "id": "shu-ruijie-template",
+    "name": "上海大学锐捷 ePortal 模板（需校验）",
+    "description": "跟随网关跳转、提取 queryString/MAC、按来源部署的固定公钥加密后提交。需核对当前门户字段；未在校园网环境实测。",
+    "tags": [
+      "上海大学",
+      "锐捷",
+      "ePortal",
+      "HTTP 模板"
+    ],
+    "author": "Misyra",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/BeiningWu/shu-net-keeper",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/shu-ruijie-template.json"
+  },
+  {
+    "id": "bit",
+    "name": "北京理工大学校园网直连（深澜 SRUN）",
+    "description": "深澜标准三步直连（网关 10.0.0.55，登录 acid=1）。改编自 coffeehat/BIT-srun-login-script（MIT），未实测，导入后请先测试。",
+    "tags": [
+      "北京理工大学",
+      "深澜",
+      "直连"
+    ],
+    "author": "coffeehat",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/coffeehat/BIT-srun-login-script",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/bit.json"
+  },
+  {
+    "id": "uestc",
+    "name": "电子科技大学校园网直连（深澜 SRUN）",
+    "description": "深澜标准三步直连（网关 10.253.0.235，默认 ac_id=3，运营商后缀 @cmcc/@dx/@dx-uestc）。改编自 b71db892/AutoLoginUESTC（MIT），未实测。",
+    "tags": [
+      "电子科技大学",
+      "深澜",
+      "直连"
+    ],
+    "author": "b71db892",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/b71db892/AutoLoginUESTC",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/uestc.json"
+  },
+  {
+    "id": "hdu",
+    "name": "杭州电子科技大学校园网直连（深澜 SRUN）",
+    "description": "深澜标准三步直连（HTTPS 网关 login.hdu.edu.cn，ac_id=0）。改编自 redchenjs/HDU-srun-login-script（MIT），未实测。",
+    "tags": [
+      "杭州电子科技大学",
+      "深澜",
+      "直连"
+    ],
+    "author": "redchenjs",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/redchenjs/HDU-srun-login-script",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/hdu.json"
+  },
+  {
+    "id": "ecnu",
+    "name": "华东师范大学校园网直连（明文门户 POST）",
+    "description": "明文表单直连（HTTPS 网关 login.ecnu.edu.cn，ac_id=4，无加密）。改编自 johnnychen94/ecnu-net-login（MIT），未实测。",
+    "tags": [
+      "华东师范大学",
+      "深澜",
+      "直连"
+    ],
+    "author": "johnnychen94",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/johnnychen94/ecnu-net-login",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/ecnu.json"
+  },
+  {
+    "id": "tju",
+    "name": "天津大学校园网直连（深澜 SRUN）",
+    "description": "深澜标准三步直连（网关 202.113.5.130，ac_id 默认 11、断网提示页为 7）。改编自 tongyifan/tju-srun-login（MIT），未实测。",
+    "tags": [
+      "天津大学",
+      "深澜",
+      "直连"
+    ],
+    "author": "tongyifan",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/tongyifan/tju-srun-login",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/tju.json"
+  },
+  {
+    "id": "buaa",
+    "name": "北京航空航天大学校园网直连（深澜 SRUN）",
+    "description": "深澜标准三步直连（网关 gw.buaa.edu.cn，ac_id=1）。改编自 panda361/BUAA_Network_Login（WTFPL），未实测。",
+    "tags": [
+      "北京航空航天大学",
+      "深澜",
+      "直连"
+    ],
+    "author": "panda361",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/panda361/BUAA_Network_Login",
+    "license": "WTFPL",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/buaa.json"
+  },
+  {
+    "id": "swpu",
+    "name": "西南石油大学校园网直连（深澜 SRUN）",
+    "description": "深澜标准三步直连（网关 172.16.245.50，IP 取自 client_ip，运营商后缀 @yd/@ydyx/@dxwx/@stu/@tch）。改编自 HCLEMINI/swpu-srun-autologin-rs（MIT），未实测。",
+    "tags": [
+      "西南石油大学",
+      "深澜",
+      "直连"
+    ],
+    "author": "HCLEMINI",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/HCLEMINI/swpu-srun-autologin-rs",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/swpu.json"
+  },
+  {
+    "id": "lzu",
+    "name": "兰州大学校园网直连（深澜 SRUN）",
+    "description": "深澜标准三步直连（网关 10.10.0.166，ac_id=2，附带空 nas_ip/captchaVal 参数）。改编自 FallenSigh/LZUSrunCLI（MIT），未实测。",
+    "tags": [
+      "兰州大学",
+      "深澜",
+      "直连"
+    ],
+    "author": "FallenSigh",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/FallenSigh/LZUSrunCLI",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/lzu.json"
+  },
+  {
+    "id": "buct",
+    "name": "北京化工大学校园网直连（深澜 SRUN）",
+    "description": "深澜标准三步直连（网关 202.4.130.95，ac_id=20）。改编自 wyfhbb/BUCT-Login（MIT），未实测。",
+    "tags": [
+      "北京化工大学",
+      "深澜",
+      "直连"
+    ],
+    "author": "wyfhbb",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/wyfhbb/BUCT-Login",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/buct.json"
+  },
+  {
+    "id": "bjtu",
+    "name": "北京交通大学校园网直连（Dr.COM 表单）",
+    "description": "Dr.COM 经典表单 GET 直连（网关 10.10.42.3，明文）。改编自 Allenpandas/BJTU-Network-autologin（Apache-2.0），未实测。",
+    "tags": [
+      "北京交通大学",
+      "Dr.COM",
+      "直连"
+    ],
+    "author": "Allenpandas",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/Allenpandas/BJTU-Network-autologin",
+    "license": "Apache-2.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/bjtu.json"
+  },
+  {
+    "id": "cdut",
+    "name": "CDUT 校园网直连（Dr.COM 表单）",
+    "description": "Dr.COM 表单直连（网关 172.20.255.252，密码 MD5 拼接变形；学校全称未注明）。改编自 by-syk/OneTapCdutNet（Apache-2.0），未实测。",
+    "tags": [
+      "CDUT",
+      "Dr.COM",
+      "直连"
+    ],
+    "author": "by_syk",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/by-syk/OneTapCdutNet",
+    "license": "Apache-2.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/cdut.json"
+  },
+  {
+    "id": "csu-drcom",
+    "name": "中南大学校园网直连（Dr.COM 表单·动态 IP）",
+    "description": "先探测 v4serip 再 POST 明文表单（账号 02+学号@zndx）。改编自 MonoLogueChi/Drcom（MIT），未实测。",
+    "tags": [
+      "中南大学",
+      "Dr.COM",
+      "直连"
+    ],
+    "author": "MonoLogueChi",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/MonoLogueChi/Drcom",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/csu-drcom.json"
+  },
+  {
+    "id": "bjut",
+    "name": "北京工业大学校园网直连（Dr.COM 表单）",
+    "description": "先取 v4serip 再 POST 明文表单（HTTPS 网关 lgn.bjut.edu.cn，v46s=1）。改编自 wangke0809/bjutNet（MIT），未实测。",
+    "tags": [
+      "北京工业大学",
+      "Dr.COM",
+      "直连"
+    ],
+    "author": "wangke0809",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/wangke0809/bjutNet",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/bjut.json"
+  },
+  {
+    "id": "nuist",
+    "name": "南京信息工程大学校园网直连（自建门户 JSON）",
+    "description": "JSON 接口表单直连（网关 a.nuist.edu.cn，密码 base64，domain=运营商）。改编自 Alrash/WebAuthenticate（MIT），未实测。",
+    "tags": [
+      "南京信息工程大学",
+      "自建门户",
+      "直连"
+    ],
+    "author": "Alrash",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/Alrash/WebAuthenticate",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/nuist.json"
+  },
+  {
+    "id": "njupt",
+    "name": "南京邮电大学校园网直连（Dr.COM eportal）",
+    "description": "dr1003 明文 GET 直连（自签名 HTTPS 网关 10.10.244.11:802，后缀 @njxy/@cmcc）。改编自 s235784/NJUPT_AutoLogin（Apache-2.0），未实测。",
+    "tags": [
+      "南京邮电大学",
+      "Dr.COM",
+      "直连"
+    ],
+    "author": "s235784",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/s235784/NJUPT_AutoLogin",
+    "license": "Apache-2.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/njupt.json"
+  },
+  {
+    "id": "cqu",
+    "name": "重庆大学校园网直连（Dr.COM eportal）",
+    "description": "chkstatus 取 IP 后 dr1004 明文 GET 直连（网关 login.cqu.edu.cn:801）。改编自 haowang02/cqu-net-auth（MIT），未实测。",
+    "tags": [
+      "重庆大学",
+      "Dr.COM",
+      "直连"
+    ],
+    "author": "haowang02",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/haowang02/cqu-net-auth",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/cqu.json"
+  },
+  {
+    "id": "csu-eportal",
+    "name": "中南大学校园网直连（eportal·802 端口）",
+    "description": "eportal 明文 GET 直连（自签名 HTTPS 网关 10.1.1.1:802，后缀 @cmccn/@unicomn/@telecomn）。改编自 barkure/CSU-Net-Portal（MIT），未实测。",
+    "tags": [
+      "中南大学",
+      "Dr.COM",
+      "直连"
+    ],
+    "author": "barkure",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/barkure/CSU-Net-Portal",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/csu-eportal.json"
+  },
+  {
+    "id": "ahut",
+    "name": "安徽理工大学校园网直连（Dr.COM 表单）",
+    "description": "dr1003 明文 GET 直连（网关 10.255.0.19，自定义运营商关键字拼后缀）。改编自 nyakang/AutoLogin（MIT），未实测。",
+    "tags": [
+      "安徽理工大学",
+      "Dr.COM",
+      "直连"
+    ],
+    "author": "nyakang",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/nyakang/AutoLogin",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/ahut.json"
+  },
+  {
+    "id": "szu",
+    "name": "深圳大学校园网直连（Dr.COM eportal）",
+    "description": "dr1003 明文 GET 直连（宿舍区网关 172.30.255.42:801，账号为校园卡卡号）。改编自 ceynri/szu-network-connecter（MIT），未实测。",
+    "tags": [
+      "深圳大学",
+      "Dr.COM",
+      "直连"
+    ],
+    "author": "ceynri",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/ceynri/szu-network-connecter",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/szu.json"
+  },
+  {
+    "id": "gzy",
+    "name": "赣州职业技术学院校园网直连（Dr.COM eportal）",
+    "description": "dr1003 明文 GET 直连（网关 192.168.100.2:801）。改编自 xiataoboy/GZYDRCOM（Apache-2.0），未实测。",
+    "tags": [
+      "赣州职业技术学院",
+      "Dr.COM",
+      "直连"
+    ],
+    "author": "xiataoboy",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/xiataoboy/GZYDRCOM",
+    "license": "Apache-2.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/gzy.json"
+  },
+  {
+    "id": "cqupt",
+    "name": "重庆邮电大学校园网直连（Dr.COM eportal）",
+    "description": "dr1003 明文 GET 直连（网关 192.168.200.2:801，后缀 @cmcc/@telecom/@unicom/@xyw）。改编自 mivinci/cqupt（Apache-2.0），未实测。",
+    "tags": [
+      "重庆邮电大学",
+      "Dr.COM",
+      "直连"
+    ],
+    "author": "mivinci",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/mivinci/cqupt",
+    "license": "Apache-2.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/cqupt.json"
+  },
+  {
+    "id": "cumt",
+    "name": "中国矿业大学校园网直连（Dr.COM eportal）",
+    "description": "dr 回调明文 GET 直连（网关 10.2.5.251:801，后缀 @cmcc/@unicom/@telecom）。改编自 pch211/CUMT-Campus-AutoLogin（MIT），未实测。",
+    "tags": [
+      "中国矿业大学",
+      "Dr.COM",
+      "直连"
+    ],
+    "author": "pch211",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/pch211/CUMT-Campus-AutoLogin",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/cumt.json"
+  },
+  {
+    "id": "seu",
+    "name": "东南大学校园网直连（Dr.COM eportal）",
+    "description": "chkstatus 取 IP 后 dr1003 明文 GET 直连（网关 w.seu.edu.cn:801，账号为一卡通号）。改编自 ChenYuWuAi/seu-autologin（Apache-2.0），未实测。",
+    "tags": [
+      "东南大学",
+      "Dr.COM",
+      "直连"
+    ],
+    "author": "ChenYuWuAi",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/ChenYuWuAi/seu-autologin",
+    "license": "Apache-2.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/seu.json"
+  },
+  {
+    "id": "yzu",
+    "name": "扬州大学校园网直连（锐捷 ePortal 明文）",
+    "description": "InterFace.do 明文表单直连（门户地址自动探测，service=运营商服务名）。改编自 luoboQAQ/yzu-campusnet-login（MIT），未实测。",
+    "tags": [
+      "扬州大学",
+      "锐捷",
+      "直连"
+    ],
+    "author": "luoboQAQ",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/luoboQAQ/yzu-campusnet-login",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/yzu.json"
+  },
+  {
+    "id": "nwu",
+    "name": "西北大学校园网直连（JSON API）",
+    "description": "JSON API 直连（网关 10.16.0.12:8081，固定 authorization 头，仅 NWU-STUDENT）。改编自 lionche/CheNet（MIT），未实测。",
+    "tags": [
+      "西北大学",
+      "JSON API",
+      "直连"
+    ],
+    "author": "lionche",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/lionche/CheNet",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/nwu.json"
+  },
+  {
+    "id": "sias",
+    "name": "郑州西亚斯学院校园网直连（H3C ac_portal RC4）",
+    "description": "H3C ac_portal 直连（网关 2.2.2.3，密码 RC4(密码, 时间戳)）。改编自 LeeAstra/autologin-sias（MIT），未实测。",
+    "tags": [
+      "郑州西亚斯学院",
+      "H3C",
+      "直连"
+    ],
+    "author": "LeeAstra",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/LeeAstra/autologin-sias",
+    "license": "MIT",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/sias.json"
+  },
+  {
+    "id": "thu",
+    "name": "清华大学校园网直连（深澜 SRUN）",
+    "description": "深澜三步直连（HTTPS auth4.tsinghua.edu.cn，ac_id 自动解析，hmd5=md5(密码)，double_stack=1）。改编自 z4yx/GoAuthing（GPL-3.0），未实测。",
+    "tags": [
+      "清华大学",
+      "深澜",
+      "直连"
+    ],
+    "author": "z4yx",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/z4yx/GoAuthing",
+    "license": "GPL-3.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/thu.json"
+  },
+  {
+    "id": "hitsz",
+    "name": "哈尔滨工业大学（深圳）校园网直连（深澜 SRUN）",
+    "description": "深澜标准三步直连（网关 10.248.98.2，ac_id=1）。改编自 muhav/hitsz-network-daemon（GPL-3.0），未实测。",
+    "tags": [
+      "哈尔滨工业大学（深圳）",
+      "深澜",
+      "直连"
+    ],
+    "author": "muhav",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/muhav/hitsz-network-daemon",
+    "license": "GPL-3.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/hitsz.json"
+  },
+  {
+    "id": "ynnu",
+    "name": "云南师范大学校园网直连（深澜 SRUN）",
+    "description": "深澜三步直连（HTTPS netlogin.ynnu.edu.cn，ac_id=1，hmd5=md5(challenge) 变体）。改编自 bigbugcc/SrunLogin（AGPL-3.0），未实测。",
+    "tags": [
+      "云南师范大学",
+      "深澜",
+      "直连"
+    ],
+    "author": "bigbugcc",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/bigbugcc/SrunLogin",
+    "license": "AGPL-3.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/ynnu.json"
+  },
+  {
+    "id": "gsau",
+    "name": "甘肃农业大学校园网直连（深澜 SRUN）",
+    "description": "深澜三步直连（网关 202.201.64.39 口径 ac_id=1，IP 取自 rad_user_info）。改编自 pcfanlxz/GSAU_Auto_Login（AGPL-3.0），未实测。",
+    "tags": [
+      "甘肃农业大学",
+      "深澜",
+      "直连"
+    ],
+    "author": "pcfanlxz",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/pcfanlxz/GSAU_Auto_Login",
+    "license": "AGPL-3.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/gsau.json"
+  },
+  {
+    "id": "cup",
+    "name": "中国石油大学（北京）校园网直连（深澜 SRUN）",
+    "description": "深澜三步直连（HTTPS login.cup.edu.cn，ac_id=12、name=Windows 98 为原仓库默认口径，回调 sdu）。改编自 125pq/CUP-Login（GPL-3.0），未实测。",
+    "tags": [
+      "中国石油大学（北京）",
+      "深澜",
+      "直连"
+    ],
+    "author": "125pq",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/125pq/CUP-Login",
+    "license": "GPL-3.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/cup.json"
+  },
+  {
+    "id": "gdou-yj",
+    "name": "广东海洋大学（阳江校区）校园网直连（深澜 SRUN）",
+    "description": "深澜三步直连（网关 10.129.1.1，acid=118，参数取自原仓库 config.json）。改编自 1328411791/GDOUYJ_Internet_Client（GPL-3.0），未实测。",
+    "tags": [
+      "广东海洋大学",
+      "深澜",
+      "直连"
+    ],
+    "author": "1328411791",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/1328411791/GDOUYJ_Internet_Client",
+    "license": "GPL-3.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/gdou-yj.json"
+  },
+  {
+    "id": "ucas",
+    "name": "中国科学院大学校园网直连（锐捷 ePortal 明文）",
+    "description": "ePortal 明文表单直连（门户 210.77.16.21，queryString 自动解析）。改编自 GentleCP/UCAS-Helper（GPL-3.0），未实测。",
+    "tags": [
+      "中国科学院大学",
+      "锐捷",
+      "直连"
+    ],
+    "author": "GentleCP",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/GentleCP/UCAS-Helper",
+    "license": "GPL-3.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/ucas.json"
+  },
+  {
+    "id": "upc",
+    "name": "中国石油大学（华东）校园网直连（锐捷 ePortal 明文）",
+    "description": "ePortal 明文表单直连（探测路径取 queryString，service=default/cmcc/unicom/ctcc）。改编自 EndangeredF1sh/UPCNet（AGPL-3.0），未实测。",
+    "tags": [
+      "中国石油大学（华东）",
+      "锐捷",
+      "直连"
+    ],
+    "author": "EndangeredF1sh",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/EndangeredF1sh/UPCNet",
+    "license": "AGPL-3.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/upc.json"
+  },
+  {
+    "id": "upc-drcom",
+    "name": "中国石油大学（华东）校园网直连（Dr.COM 表单·无线）",
+    "description": "Dr.COM 表单直连（无线网关 172.16.4.3，密码 MD5 拼接变形）。改编自 upclinux/DrUPC（GPL-2.0），未实测。",
+    "tags": [
+      "中国石油大学（华东）",
+      "Dr.COM",
+      "直连"
+    ],
+    "author": "upclinux",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/upclinux/DrUPC",
+    "license": "GPL-2.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/upc-drcom.json"
+  },
+  {
+    "id": "whu",
+    "name": "武汉大学校园网直连（锐捷 ePortal 明文）",
+    "description": "ePortal 明文表单直连（门户 172.19.1.9:8080，service=Internet/dianxin/liantong/yidong）。改编自 duament/WHU_captive_portal_login（GPL-3.0），未实测。",
+    "tags": [
+      "武汉大学",
+      "锐捷",
+      "直连"
+    ],
+    "author": "duament",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/duament/WHU_captive_portal_login",
+    "license": "GPL-3.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/whu.json"
+  },
+  {
+    "id": "fzu",
+    "name": "福州大学校园网直连（锐捷 ePortal 明文）",
+    "description": "ePortal 明文表单直连（门户 172.16.0.46，先种 Cookie 再提交）。改编自 west2-online/fzu-network-login（AGPL-3.0），未实测。",
+    "tags": [
+      "福州大学",
+      "锐捷",
+      "直连"
+    ],
+    "author": "west2-online",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/west2-online/fzu-network-login",
+    "license": "AGPL-3.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/fzu.json"
+  },
+  {
+    "id": "suse",
+    "name": "四川轻化工大学校园网直连（锐捷 ePortal 明文）",
+    "description": "ePortal 明文表单直连（queryString 双重编码，service=门户选项原文）。改编自 blackyau/luci-app-suselogin（GPL-3.0），未实测。",
+    "tags": [
+      "四川轻化工大学",
+      "锐捷",
+      "直连"
+    ],
+    "author": "blackyau",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/blackyau/luci-app-suselogin",
+    "license": "GPL-3.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/suse.json"
+  },
+  {
+    "id": "ysu",
+    "name": "燕山大学校园网直连（锐捷 ePortal 明文）",
+    "description": "ePortal 明文表单直连（门户 auth.ysu.edu.cn，service=校园网/中国移动等原文）。改编自 cyjin-yl/YSUNetLogin（GPL-2.0），未实测。",
+    "tags": [
+      "燕山大学",
+      "锐捷",
+      "直连"
+    ],
+    "author": "cyjin-yl",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/cyjin-yl/YSUNetLogin",
+    "license": "GPL-2.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/ysu.json"
+  },
+  {
+    "id": "swu",
+    "name": "西南大学校园网直连（锐捷 ePortal 明文）",
+    "description": "ePortal 明文表单直连（门户主机自动探测，service=默认）。改编自 AlchemyHAN/SWU-Network-Pass（GPL-3.0），未实测。",
+    "tags": [
+      "西南大学",
+      "锐捷",
+      "直连"
+    ],
+    "author": "AlchemyHAN",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/AlchemyHAN/SWU-Network-Pass",
+    "license": "GPL-3.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/swu.json"
+  },
+  {
+    "id": "shmtu",
+    "name": "上海海事大学校园网直连（锐捷 ePortal 明文）",
+    "description": "ePortal 明文表单直连（HTTPS ismu.shmtu.edu.cn:8443，service=校园网）。改编自 a645162/shmtu-auth（GPL-3.0），未实测。",
+    "tags": [
+      "上海海事大学",
+      "锐捷",
+      "直连"
+    ],
+    "author": "a645162",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/a645162/shmtu-auth",
+    "license": "GPL-3.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/shmtu.json"
+  },
+  {
+    "id": "stu",
+    "name": "汕头大学校园网直连（H3C ac_portal 明文）",
+    "description": "ac_portal 明文单步直连（HTTPS a.stu.edu.cn）。改编自 HEX9CF/CupidConnector（GPL-3.0）与 xuzhihaoup/STUnet_connect（GPL-3.0），未实测。",
+    "tags": [
+      "汕头大学",
+      "H3C",
+      "直连"
+    ],
+    "author": "HEX9CF",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/HEX9CF/CupidConnector",
+    "license": "GPL-3.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/stu.json"
+  },
+  {
+    "id": "gxu",
+    "name": "广西大学校园网直连（Dr.COM eportal）",
+    "description": "dr1003 明文 GET 直连（网关 172.17.0.2:801，后缀 @telecom/@unicom/@cmcc）。改编自 Chocola-X/GXU-Net-AutoLogin（AGPL-3.0），未实测。",
+    "tags": [
+      "广西大学",
+      "Dr.COM",
+      "直连"
+    ],
+    "author": "Chocola-X",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/Chocola-X/GXU-Net-AutoLogin",
+    "license": "AGPL-3.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/gxu.json"
+  },
+  {
+    "id": "guet",
+    "name": "桂林电子科技大学校园网直连（Dr.COM 表单）",
+    "description": "dr1003 明文 GET 直连（网关 10.0.1.5，后缀 @cmcc/@unicom/@telecom）。改编自 ReRokutosei/AutoLoginGuet（GPL-3.0），未实测。",
+    "tags": [
+      "桂林电子科技大学",
+      "Dr.COM",
+      "直连"
+    ],
+    "author": "ReRokutosei",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/ReRokutosei/AutoLoginGuet",
+    "license": "GPL-3.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/guet.json"
+  },
+  {
+    "id": "cqnu",
+    "name": "重庆师范大学校园网直连（Dr.COM 表单）",
+    "description": "ACSetting 明文 POST 直连（网关 10.0.251.18:801，后缀 telecom/xyw）。改编自 smartzzx/drcom-web-CQNU（AGPL-3.0），未实测。",
+    "tags": [
+      "重庆师范大学",
+      "Dr.COM",
+      "直连"
+    ],
+    "author": "smartzzx",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/smartzzx/drcom-web-CQNU",
+    "license": "AGPL-3.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/cqnu.json"
+  },
+  {
+    "id": "ptxy",
+    "name": "莆田学院校园网直连（Dr.COM eportal）",
+    "description": "dr1003 明文 GET 直连（服务器 IP 需自行填入，账号 ,0,学号@telecom，紫霄校区）。改编自 XilinGuo/automatic_login_Drcom（GPL-2.0），未实测。",
+    "tags": [
+      "莆田学院",
+      "Dr.COM",
+      "直连"
+    ],
+    "author": "XilinGuo",
+    "version": "1.0.0",
+    "type": "http",
+    "source": "https://github.com/XilinGuo/automatic_login_Drcom",
+    "license": "GPL-2.0",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/ptxy.json"
   }
 ]

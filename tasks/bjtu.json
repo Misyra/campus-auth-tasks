@@ -1,0 +1,34 @@
+{
+  "type": "http",
+  "task_id": "bjtu",
+  "name": "北京交通大学校园网直连（Dr.COM 表单）",
+  "description": "适用于北京交通大学校园网（10.10.42.3，备选 10.10.43.3）的直连登录：GET /drcom/login 提交经典表单字段（DDDDD/upass/0MKKey=123456/R1=R3=R6=0/para=00），明文密码，成功与否以登录后的网络检测判定。网关换了地址时改登录地址即可。原仓库靠循环轮询保持在线，由认证喵的定时任务承担。改编自 Allenpandas/BJTU-Network-autologin（Apache-2.0），未在校园网环境实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var MAP = {};\n  var suffix = \"\";\n  var isp = (ctx.isp || \"\").trim();\n  if (isp) { suffix = MAP[isp] !== undefined ? MAP[isp] : (isp.charAt(0) === \"@\" ? isp : \"\"); }\n  var full = (ctx.username || \"\") + suffix;\n  var out = { form_username: url_encode(full), form_password: url_encode(ctx.password || \"\") };\n  out[\"callback\"] = \"dr\" + Math.floor(now_ms()); out[\"ts\"] = String(Math.floor(now_ms()));\n  return out;\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://10.10.42.3/drcom/login?callback={callback}&DDDDD={form_username}&upass={form_password}&0MKKey=123456&R1=0&R3=0&R6=0&para=00&v6ip=&_={ts}"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "Allenpandas",
+    "school": "北京交通大学",
+    "device": "Dr.COM 经典表单（/drcom/login）",
+    "protocol": "GET /drcom/login?callback=dr…&DDDDD=…&upass=…&0MKKey=123456（明文）",
+    "source": "https://github.com/Allenpandas/BJTU-Network-autologin",
+    "license": "Apache-2.0"
+  },
+  "version": "1.0.0"
+}

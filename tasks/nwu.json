@@ -1,0 +1,36 @@
+{
+  "type": "http",
+  "task_id": "nwu",
+  "name": "西北大学校园网直连（JSON API）",
+  "description": "适用于西北大学 NWU-STUDENT 无线网（10.16.0.12:8081）的直连登录：POST /portal/api/v2/online JSON（webAuthUser/webAuthPassword 明文，redirectUrl 内嵌本机 MAC/IP）。authorization 请求头为原仓库抓包所得的固定值，可能随门户升级失效。仅支持 NWU-STUDENT（不支持 NWUNET）。改编自 lionche/CheNet（MIT），未在校园网环境实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "组装 JSON",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var mac = (ctx.local_mac || \"\").toLowerCase();\n  var ip = ctx.local_ip || \"\";\n  var payload = {\n    deviceType: \"Android\",\n    webAuthUser: ctx.username || \"\",\n    webAuthPassword: ctx.password || \"\",\n    redirectUrl: \"http://10.16.0.12:8081/?usermac=\" + mac + \"&userip=\" + ip + \"&origurl=http://edge.microsoft.com/captiveportal/generate_204&nasip=10.100.0.1\",\n    type: \"login\"\n  };\n  return { body_json: JSON.stringify(payload) };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "POST",
+      "url": "http://10.16.0.12:8081/portal/api/v2/online",
+      "headers": "Content-Type: application/json\nauthorization: d258e916aa384de449a489e2abf0642e394dc69548cdbdda602fa64a6f3469de083c110756e9cefd9270b6d7cc354ff123223db4cf860564",
+      "body": "{body_json}"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "lionche",
+    "school": "西北大学",
+    "device": "自建 Portal（JSON API）",
+    "protocol": "POST :8081/portal/api/v2/online（webAuthUser/webAuthPassword JSON，authorization 固定头）",
+    "source": "https://github.com/lionche/CheNet",
+    "license": "MIT"
+  },
+  "version": "1.0.0"
+}

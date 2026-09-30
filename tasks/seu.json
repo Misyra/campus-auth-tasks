@@ -1,0 +1,47 @@
+{
+  "type": "http",
+  "task_id": "seu",
+  "name": "东南大学校园网直连（Dr.COM eportal）",
+  "description": "适用于东南大学校园网（w.seu.edu.cn）的直连登录：先 GET /drcom/chkstatus 提取本机 IP（v46ip），再 GET :801/eportal/?c=Portal&a=login 提交明文账号密码，user_account=,0,一卡通号。改编自 ChenYuWuAi/seu-autologin（Apache-2.0），未在校园网环境实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "chkstatus",
+      "name": "取本机 IP",
+      "kind": "request",
+      "method": "GET",
+      "url": "https://w.seu.edu.cn/drcom/chkstatus?callback=dr1003",
+      "extracts": [
+        {
+          "source": "regex:\"v46ip\"\\s*:\\s*\"([^\"]*)\"",
+          "name": "v46ip"
+        }
+      ]
+    },
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  return { ua: url_encode(\",0,\" + (ctx.username || \"\")), ep: url_encode(ctx.password || \"\") };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "GET",
+      "url": "https://w.seu.edu.cn:801/eportal/?c=Portal&a=login&callback=dr1003&login_method=1&user_account={ua}&user_password={ep}&wlan_user_ip={v46ip}"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "ChenYuWuAi",
+    "school": "东南大学",
+    "device": "Dr.COM eportal（w.seu.edu.cn:801，明文）",
+    "protocol": "GET /drcom/chkstatus 取 v46ip → GET :801/eportal/?c=Portal&a=login（user_account=,0,一卡通号，明文）",
+    "source": "https://github.com/ChenYuWuAi/seu-autologin",
+    "license": "Apache-2.0"
+  },
+  "version": "1.0.0"
+}

@@ -1,0 +1,49 @@
+{
+  "type": "http",
+  "task_id": "srun-bx1-template",
+  "name": "深澜 SRUN BX1 登录模板（需设置网关）",
+  "description": "适用于使用 get_challenge 与 srun_portal 的 srun_bx1 门户。导入后先把两步请求地址中的 10.0.0.1 改为本校认证网关，并核对 ac_id、n、type 和运营商账号格式；此模板未针对具体学校验证。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "编码账号",
+      "kind": "transform",
+      "script": "function transform(ctx) { return { encoded_username: url_encode(ctx.username), callback: 'jQuery1124_' + now_ms() }; }"
+    },
+    {
+      "id": "challenge",
+      "name": "获取 challenge",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://10.0.0.1/cgi-bin/get_challenge?callback={callback}&username={encoded_username}&ip={local_ip}",
+      "extracts": [{ "source": "regex:\"challenge\"\\s*:\\s*\"([^\"]+)\"", "name": "challenge" }]
+    },
+    {
+      "id": "sign",
+      "name": "计算深澜签名",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  // 不同学校可能需要调整 ac_id、n、type 与账号后缀。\n  const acId = '1';\n  const n = '200';\n  const type = '1';\n  const ip = ctx.local_ip;\n  if (!ip) throw new Error('无法读取本机 IPv4，请检查校园网接口');\n  const token = ctx.vars.challenge;\n  const info = srun_info(JSON.stringify({ username: ctx.username, password: ctx.password, ip: ip, acid: acId, enc_ver: 'srun_bx1' }), token);\n  const hmd5 = hmac_md5(token, ctx.password);\n  const checksum = sha1(token + ctx.username + token + hmd5 + token + acId + token + ip + token + n + token + type + token + info);\n  return { encoded_username: url_encode(ctx.username), encoded_password: url_encode('{MD5}' + hmd5), encoded_info: url_encode(info), checksum: checksum, ac_id: acId, n: n, protocol_type: type };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://10.0.0.1/cgi-bin/srun_portal?callback={callback}&action=login&username={encoded_username}&password={encoded_password}&ac_id={ac_id}&ip={local_ip}&chksum={checksum}&info={encoded_info}&n={n}&type={protocol_type}",
+      "headers": "Accept: application/json, text/javascript, */*"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "failure_pattern": "\"error\":\"login_error\"",
+  "failure_action": "credential",
+  "metadata": {
+    "author": "Misyra",
+    "school": "通用模板，需按学校配置",
+    "device": "深澜 SRUN BX1",
+    "source": "https://github.com/Anchor-GitHu/luci-app-srun-login"
+  },
+  "version": "1.0.0"
+}

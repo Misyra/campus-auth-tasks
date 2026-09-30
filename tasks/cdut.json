@@ -1,0 +1,36 @@
+{
+  "type": "http",
+  "task_id": "cdut",
+  "name": "CDUT 校园网直连（Dr.COM 表单）",
+  "description": "适用于 CDUT 校园网门户（172.20.255.252）的直连登录：POST 经典表单，密码按原实现变形为 MD5(\"1\"+密码+\"12345678\") 后接 \"123456781\"（即原样拼接 CALG+PID）。原 README 只写缩写 CDUT 未注明学校全称，请自行核对是否为本校网关。改编自 by-syk/OneTapCdutNet（Apache-2.0），未在校园网环境实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "变形密码",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var pwd = ctx.password || \"\";\n  return { form_username: url_encode(ctx.username || \"\"), form_password: md5(\"1\" + pwd + \"12345678\") + \"12345678\" + \"1\" };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "POST",
+      "url": "http://172.20.255.252/",
+      "headers": "Content-Type: application/x-www-form-urlencoded",
+      "body": "DDDDD={form_username}&upass={form_password}&R1=0&R2=1&para=00&0MKKey=123456"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "by_syk",
+    "school": "成都理工大学（CDUT，仓库未写全称）",
+    "device": "Dr.COM 经典表单（MD5 变形密码）",
+    "protocol": "POST /：upass = MD5(\"1\"+密码+\"12345678\")+\"12345678\"+\"1\"",
+    "source": "https://github.com/by-syk/OneTapCdutNet",
+    "license": "Apache-2.0"
+  },
+  "version": "1.0.0"
+}

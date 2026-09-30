@@ -1,0 +1,35 @@
+{
+  "type": "http",
+  "task_id": "csu-eportal",
+  "name": "中南大学校园网直连（eportal·802 端口）",
+  "description": "适用于中南大学新校区 eportal 门户（10.1.1.1:802，自签名 HTTPS，任务已开启忽略证书错误）的直连登录：GET /eportal/portal/login 提交明文账号密码。运营商后缀按原仓库口径：移动→@cmccn、联通→@unicomn、电信→@telecomn、校园网→无后缀，映射表写在「准备账号」步骤开头可改。与 csu-drcom（升华公寓区表单门户）是两套不同部署。改编自 barkure/CSU-Net-Portal（MIT），未在校园网环境实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var MAP = {\"移动\": \"@cmccn\", \"联通\": \"@unicomn\", \"电信\": \"@telecomn\"};\n  var suffix = \"\";\n  var isp = (ctx.isp || \"\").trim();\n  if (isp) { suffix = MAP[isp] !== undefined ? MAP[isp] : (isp.charAt(0) === \"@\" ? isp : \"\"); }\n  var full = (ctx.username || \"\") + suffix;\n  var out = { form_username: url_encode(full), form_password: url_encode(ctx.password || \"\") };\n  \n  return out;\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "GET",
+      "url": "https://10.1.1.1:802/eportal/portal/login?user_account={form_username}&user_password={form_password}"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "barkure",
+    "school": "中南大学",
+    "device": "Dr.COM eportal（10.1.1.1:802，明文）",
+    "protocol": "GET https://10.1.1.1:802/eportal/portal/login（user_account=学号[@cmccn|@unicomn|@telecomn]，明文）",
+    "source": "https://github.com/barkure/CSU-Net-Portal",
+    "license": "MIT"
+  },
+  "version": "1.0.0",
+  "ignore_https_errors": true
+}

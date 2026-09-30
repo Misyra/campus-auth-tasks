@@ -1,0 +1,49 @@
+{
+  "type": "http",
+  "task_id": "whu",
+  "name": "武汉大学校园网直连（锐捷 ePortal 明文）",
+  "description": "适用于武汉大学校园网门户（172.19.1.9:8080）的直连登录：先访问 generate_204 探测地址，从跳转页提取 queryString，再 POST /eportal/InterFace.do?method=login 明文表单。运营商映射按原实现：校园网/CERNET→Internet、电信→dianxin、联通→liantong、移动→yidong，映射表在「解析 queryString」步骤开头可改。改编自 duament/WHU_captive_portal_login（GPL-3.0），随本仓库以 AGPL-3.0 分发，未实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "probe",
+      "name": "探测门户",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://conn1.oppomobile.com/generate_204",
+      "extracts": [
+        {
+          "source": "regex:(?:location\\.href\\s*=\\s*['\"]|href=['\"])([^'\"]+)",
+          "name": "portal_url"
+        }
+      ]
+    },
+    {
+      "id": "prepare",
+      "name": "解析 queryString",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var u = ctx.vars.portal_url || \"\";\n  if (!u || u.indexOf(\"?\") < 0) throw new Error(\"未能获取门户跳转地址（Location），请核对本校门户地址后把地址写进本步骤脚本\");\n  var q = u.slice(u.indexOf(\"?\") + 1);\n  var host = u.split(\"/\")[2];\n  var MAP = {\"校园网\": \"Internet\", \"CERNET\": \"Internet\", \"电信\": \"dianxin\", \"联通\": \"liantong\", \"移动\": \"yidong\"};\n  var isp = (ctx.isp || \"\").trim();\n  var service = isp ? (MAP[isp] !== undefined ? MAP[isp] : isp) : \"Internet\";\n  return { portal_host: host, qse: url_encode(q), eu: url_encode(ctx.username || \"\"), ep: url_encode(ctx.password || \"\"), es: url_encode(service) };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "POST",
+      "url": "http://172.19.1.9:8080/eportal/InterFace.do?method=login",
+      "headers": "Content-Type: application/x-www-form-urlencoded",
+      "body": "userId={eu}&password={ep}&service={es}&queryString={qse}&operatorPwd=&operatorUserId=&validcode=&passwordEncrypt=false"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "duament",
+    "school": "武汉大学",
+    "device": "锐捷 ePortal（InterFace.do，明文）",
+    "protocol": "generate_204 探测取跳转 query → POST 172.19.1.9:8080/eportal/InterFace.do?method=login",
+    "source": "https://github.com/duament/WHU_captive_portal_login",
+    "license": "GPL-3.0"
+  },
+  "version": "1.0.0"
+}

@@ -1,0 +1,49 @@
+{
+  "type": "http",
+  "task_id": "shmtu",
+  "name": "上海海事大学校园网直连（锐捷 ePortal 明文）",
+  "description": "适用于上海海事大学校园网门户（ismu.shmtu.edu.cn:8443，HTTPS）的直连登录：先 GET 学校官网从跳转链接提取认证查询串，按原实现把 &/= 预编码为 %2526/%253D（原代码先替换为 %26/%3D、requests 提交时再编码一次，线上等效）后 POST /eportal/InterFace.do?method=login 明文表单，service 固定发送门户预编码串 %E6%A0%A1%E5%9B%AD%E7%BD%91（校园网），passwordEncrypt 按原实现 str(False) 发送 False。改编自 a645162/shmtu-auth（GPL-3.0），随本仓库以 AGPL-3.0 分发，未实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "probe",
+      "name": "探测门户",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://www.shmtu.edu.cn/",
+      "extracts": [
+        {
+          "source": "regex:'([^']*index\\.jsp\\?[^']*)'",
+          "name": "portal_url"
+        }
+      ]
+    },
+    {
+      "id": "prepare",
+      "name": "解析 queryString",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var u = ctx.vars.portal_url || \"\";\n  if (!u || u.indexOf(\"?\") < 0) throw new Error(\"未能从官网页面提取认证跳转地址，请核对门户地址\");\n  // 原实现 get_query_string_requests.py L27：先替换为 %26/%3D，requests data= 提交时把 % 再编码为 %25 => 线上等效 %2526/%253D\n  var qs = u.slice(u.indexOf(\"?\") + 1).replace(/&/g, \"%2526\").replace(/=/g, \"%253D\");\n  // shmtu_auth_const_value.py ServiceType.EDU 为预编码串 \"%E6%A0%A1%E5%9B%AD%E7%BD%91\"，requests 提交时再编码一次 => 双重编码\n  return { eu: url_encode(ctx.username || \"\"), ep: url_encode(ctx.password || \"\"), es: url_encode(\"%E6%A0%A1%E5%9B%AD%E7%BD%91\"), qse: qs };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "POST",
+      "url": "https://ismu.shmtu.edu.cn:8443/eportal/InterFace.do?method=login",
+      "headers": "Content-Type: application/x-www-form-urlencoded",
+      "body": "userId={eu}&password={ep}&service={es}&queryString={qse}&operatorPwd=&operatorUserId=&validcode=&passwordEncrypt=False"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "a645162",
+    "school": "上海海事大学",
+    "device": "锐捷 ePortal（InterFace.do，明文）",
+    "protocol": "GET www.shmtu.edu.cn 取 index.jsp 查询串 → POST ismu.shmtu.edu.cn:8443/eportal/InterFace.do?method=login",
+    "source": "https://github.com/a645162/shmtu-auth",
+    "license": "GPL-3.0"
+  },
+  "version": "1.0.0"
+}

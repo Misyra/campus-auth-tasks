@@ -1,0 +1,34 @@
+{
+  "type": "http",
+  "task_id": "gxu",
+  "name": "广西大学校园网直连（Dr.COM eportal）",
+  "description": "适用于广西大学校园网（172.17.0.2:801，新版哆点 eportal）的直连登录：GET /eportal/portal/login 提交明文账号密码，运营商映射：校园网→无后缀、电信→@telecom、联通→@unicom、移动→@cmcc。timeflyingaway/GXU-Login 为同一网关旧版 ACSetting 接口的实现，旧部署用户可参考其抓包口径。改编自 Chocola-X/GXU-Net-AutoLogin（AGPL-3.0），随本仓库以 AGPL-3.0 分发，未实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var MAP = { \"电信\": \"telecom\", \"联通\": \"unicom\", \"移动\": \"cmcc\" };\n  var isp = (ctx.isp || \"\").trim();\n  var s = isp ? (MAP[isp] !== undefined ? MAP[isp] : (isp.charAt(0) === \"@\" ? isp.substring(1) : \"\")) : \"\";\n  var full = (ctx.username || \"\") + (s ? \"@\" + s : \"\");\n  var mac = (ctx.local_mac || \"\").replace(/:/g, \"\").toLowerCase();\n  return { ua: url_encode(full), ep: url_encode(ctx.password || \"\"), mac: mac };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://172.17.0.2:801/eportal/portal/login?callback=dr1003&login_method=1&user_account={ua}&user_password={ep}&wlan_user_ip={local_ip}&wlan_user_mac={mac}&wlan_user_ipv6=&wlan_ac_ip=&wlan_ac_name=&jsVersion=4.2.1&terminal_type=1&lang=zh-cn&v=5574"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "Chocola-X",
+    "school": "广西大学",
+    "device": "Dr.COM eportal（dr1003，明文）",
+    "protocol": "GET :801/eportal/portal/login（user_account=账号[@isp]，明文）",
+    "source": "https://github.com/Chocola-X/GXU-Net-AutoLogin",
+    "license": "AGPL-3.0"
+  },
+  "version": "1.0.0"
+}

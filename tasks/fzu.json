@@ -1,0 +1,61 @@
+{
+  "type": "http",
+  "task_id": "fzu",
+  "name": "福州大学校园网直连（锐捷 ePortal 明文）",
+  "description": "适用于福州大学校园网门户（172.16.0.46）的直连登录：先 GET 123.123.123.123 从跳转页 location.href 提取门户地址，GET 一次该地址种会话 Cookie，再 POST /eportal/InterFace.do?method=login 明文表单（service 传空）。改编自 west2-online/fzu-network-login（AGPL-3.0），随本仓库以 AGPL-3.0 分发，未实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "probe",
+      "name": "探测门户",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://123.123.123.123/",
+      "extracts": [
+        {
+          "source": "regex:location\\.href\\s*=\\s*'https?://([^/'\"]+)",
+          "name": "portal_host"
+        },
+        {
+          "source": "regex:location\\.href\\s*=\\s*'https?://[^/]+(/[^']*)",
+          "name": "portal_path"
+        }
+      ]
+    },
+    {
+      "id": "visit",
+      "name": "打开跳转页种 Cookie",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://{portal_host}{portal_path}",
+      "on_error": "continue"
+    },
+    {
+      "id": "prepare",
+      "name": "解析 queryString",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var p = ctx.vars.portal_path || \"\";\n  if (!p || p.indexOf(\"?\") < 0) throw new Error(\"未能获取门户跳转地址，请核对本校门户地址后把地址写进本步骤脚本\");\n  var q = p.slice(p.indexOf(\"?\") + 1);\n  return { eu: url_encode(ctx.username || \"\"), ep: url_encode(ctx.password || \"\"), es: url_encode(\"\"), qse: url_encode(url_encode(q)) }; // 原实现 login.py L159 quote(query_string, safe=\"\")，requests data= 提交时再整体编码一次 => 双重编码\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "POST",
+      "url": "http://{portal_host}/eportal/InterFace.do?method=login",
+      "headers": "Content-Type: application/x-www-form-urlencoded",
+      "body": "userId={eu}&password={ep}&service={es}&queryString={qse}&operatorPwd=&operatorUserId=&validcode=&passwordEncrypt=false"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "west2-online",
+    "school": "福州大学",
+    "device": "锐捷 ePortal（InterFace.do，明文）",
+    "protocol": "GET 123.123.123.123 取 location.href → GET 跳转页种 Cookie → POST 172.16.0.46/eportal/InterFace.do?method=login",
+    "source": "https://github.com/west2-online/fzu-network-login",
+    "license": "AGPL-3.0"
+  },
+  "version": "1.0.0"
+}

@@ -1,0 +1,34 @@
+{
+  "type": "http",
+  "task_id": "cumt",
+  "name": "中国矿业大学校园网直连（Dr.COM eportal）",
+  "description": "适用于中国矿业大学校园网（10.2.5.251:801，CUMT_Stu）的直连登录：GET /eportal?c=Portal&a=login 提交明文账号密码，user_account=学号+运营商后缀（移动→@cmcc、联通→@unicom、电信→@telecom、校园网→无后缀），MAC/IP 取本机网卡。映射表写在「准备账号」步骤开头可改。改编自 pch211/CUMT-Campus-AutoLogin（MIT），未在校园网环境实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var MAP = { \"移动\": \"cmcc\", \"联通\": \"unicom\", \"电信\": \"telecom\" };\n  var isp = (ctx.isp || \"\").trim();\n  var s = \"\";\n  if (isp) { s = MAP[isp] !== undefined ? MAP[isp] : (isp.charAt(0) === \"@\" ? isp.substring(1) : \"\"); }\n  var full = (ctx.username || \"\") + (s ? \"@\" + s : \"\");\n  var mac = (ctx.local_mac || \"\").replace(/:/g, \"\").toLowerCase();\n  var ts = String(Math.floor(now_ms()));\n  return { ua: url_encode(full), ep: url_encode(ctx.password || \"\"), mac: mac, ts: ts, callback: \"dr\" + ts };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://10.2.5.251:801/eportal/?c=Portal&a=login&callback={callback}&login_method=1&user_account={ua}&user_password={ep}&wlan_user_ip={local_ip}&wlan_user_mac={mac}&wlan_ac_ip=&wlan_ac_name=NAS&jsVersion=3.0&_={ts}"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "pch211",
+    "school": "中国矿业大学",
+    "device": "Dr.COM eportal（10.2.5.251:801，明文）",
+    "protocol": "GET :801/eportal?c=Portal&a=login（user_account=学号@isp，明文，wlan_ac_name=NAS）",
+    "source": "https://github.com/pch211/CUMT-Campus-AutoLogin",
+    "license": "MIT"
+  },
+  "version": "1.0.0"
+}

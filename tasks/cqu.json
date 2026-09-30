@@ -1,0 +1,47 @@
+{
+  "type": "http",
+  "task_id": "cqu",
+  "name": "重庆大学校园网直连（Dr.COM eportal）",
+  "description": "适用于重庆大学校园网（login.cqu.edu.cn）的直连登录：先 GET /drcom/chkstatus 提取本机 IP（v46ip），再 GET :801/eportal/portal/login 提交明文账号密码（user_account=,0,学号，PC 端口径）。若提示 IP 已被其他账号使用，先在门户自行解绑或下线。原仓库的 5 秒轮询保活由认证喵的定时任务承担。改编自 haowang02/cqu-net-auth（MIT），未在校园网环境实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "chkstatus",
+      "name": "取本机 IP",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://login.cqu.edu.cn/drcom/chkstatus?callback=dr1002&jsVersion=4.X&v=5505&lang=zh",
+      "extracts": [
+        {
+          "source": "regex:\"v46ip\"\\s*:\\s*\"([^\"]*)\"",
+          "name": "v46ip"
+        }
+      ]
+    },
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  return { ua: url_encode(\",0,\" + (ctx.username || \"\")), ep: url_encode(ctx.password || \"\") };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://login.cqu.edu.cn:801/eportal/portal/login?callback=dr1004&login_method=1&user_account={ua}&user_password={ep}&wlan_user_ip={v46ip}&wlan_user_ipv6=&wlan_user_mac=000000000000&wlan_ac_ip=&wlan_ac_name=&term_ua=Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F144.0.0.0%20Safari%2F537.36%20Edg%2F144.0.0.0&term_type=1&jsVersion=4.2.2&terminal_type=1&lang=zh-cn&v=1176&lang=zh-cn"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "haowang02",
+    "school": "重庆大学",
+    "device": "Dr.COM eportal（dr1004，明文）",
+    "protocol": "GET /drcom/chkstatus 取 v46ip → GET :801/eportal/portal/login（user_account=,0,学号，明文）",
+    "source": "https://github.com/haowang02/cqu-net-auth",
+    "license": "MIT"
+  },
+  "version": "1.0.0"
+}

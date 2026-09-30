@@ -1,0 +1,49 @@
+{
+  "type": "http",
+  "task_id": "suse",
+  "name": "四川轻化工大学校园网直连（锐捷 ePortal 明文）",
+  "description": "适用于四川轻化工大学锐捷 Web 认证的直连登录：先访问 generate_204 探测地址取 index.jsp 跳转地址，把路径替换为 /eportal/InterFace.do?method=login 后提交明文表单；queryString 按原实现双重编码（&→%2526、=→%253D）。运营商经 service 传门户选项值（校园网/宜宾电信/宜宾移动/宜宾联通，与 LuCI cbi 的预编码选项一致）；表单尾部按原实现以字面量「&...」结束（原脚本不发送 operatorPwd 等其余字段，门户可接受）。改编自 blackyau/luci-app-suselogin（GPL-3.0），随本仓库以 AGPL-3.0 分发，未实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "probe",
+      "name": "探测门户",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://gstatic.com/generate_204",
+      "extracts": [
+        {
+          "source": "regex:['\"]?(https?://[^'\"\\s]*index\\.jsp\\?[^'\"\\s]+)",
+          "name": "portal_url"
+        }
+      ]
+    },
+    {
+      "id": "prepare",
+      "name": "解析 queryString",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var u = ctx.vars.portal_url || \"\";\n  if (!u || u.indexOf(\"?\") < 0) throw new Error(\"未能获取门户跳转地址，请核对本校门户地址后把地址写进本步骤脚本\");\n  var q = u.slice(u.indexOf(\"?\") + 1);\n  var host = u.split(\"/\")[2];\n  // 原 cbi suselogin.lua L23-26 的 isp 选项 value（预编码中文）：宜宾电信/宜宾移动/校园网/宜宾联通\n  var MAP = { \"校园网\": \"校园网\", \"电信\": \"宜宾电信\", \"移动\": \"宜宾移动\", \"联通\": \"宜宾联通\" };\n  var isp = (ctx.isp || \"\").trim();\n  var service = isp ? (MAP[isp] !== undefined ? MAP[isp] : isp) : \"校园网\";\n  return { portal_host: host, qse: q.replace(/&/g, \"%2526\").replace(/=/g, \"%253D\"), eu: url_encode(ctx.username || \"\"), ep: url_encode(ctx.password || \"\"), es: url_encode(service) };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "POST",
+      "url": "http://{portal_host}/eportal/InterFace.do?method=login",
+      "headers": "Content-Type: application/x-www-form-urlencoded\nCookie: EPORTAL_COOKIE_OPERATORPWD=; ...",
+      "body": "userId={eu}&password={ep}&service={es}&queryString={qse}&..."
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "blackyau",
+    "school": "四川轻化工大学",
+    "device": "锐捷 ePortal（InterFace.do，明文）",
+    "protocol": "generate_204 探测取 index.jsp 地址 → 同路径替换为 InterFace.do 登录（queryString 双重编码）",
+    "source": "https://github.com/blackyau/luci-app-suselogin",
+    "license": "GPL-3.0"
+  },
+  "version": "1.0.0"
+}

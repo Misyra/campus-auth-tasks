@@ -1,0 +1,35 @@
+{
+  "type": "http",
+  "task_id": "njupt",
+  "name": "南京邮电大学校园网直连（Dr.COM eportal）",
+  "description": "适用于南京邮电大学校园网（10.10.244.11:802，自签名 HTTPS，任务已开启忽略证书错误）的直连登录：GET /eportal/portal/login 提交明文账号密码，user_account 按原仓库口径为「,0,学号+后缀」（电信→@njxy、移动→@cmcc、校园网/教育网→无后缀），IPv4 提交后即可联网。原仓库另有 192.168.168.168 的 IPv6 辅助表单，未收录。改编自 s235784/NJUPT_AutoLogin（Apache-2.0），未在校园网环境实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var MAP = { \"电信\": \"@njxy\", \"移动\": \"@cmcc\" };\n  var suffix = \"\";\n  var isp = (ctx.isp || \"\").trim();\n  if (isp) { suffix = MAP[isp] !== undefined ? MAP[isp] : (isp.charAt(0) === \"@\" ? isp : \"\"); }\n  var full = (ctx.username || \"\") + suffix;\n  return { ua: url_encode(\",0,\" + full), ep: url_encode(ctx.password || \"\") };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "GET",
+      "url": "https://10.10.244.11:802/eportal/portal/login?callback=dr1003&login_method=1&user_account={ua}&user_password={ep}&wlan_user_ip={local_ip}"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "s235784",
+    "school": "南京邮电大学",
+    "device": "Dr.COM eportal（dr1003，明文）",
+    "protocol": "GET https://10.10.244.11:802/eportal/portal/login（user_account=,0,学号[@njxy|@cmcc]，明文）",
+    "source": "https://github.com/s235784/NJUPT_AutoLogin",
+    "license": "Apache-2.0"
+  },
+  "version": "1.0.0",
+  "ignore_https_errors": true
+}

@@ -1,0 +1,34 @@
+{
+  "type": "http",
+  "task_id": "ptxy",
+  "name": "莆田学院校园网直连（Dr.COM eportal）",
+  "description": "适用于莆田学院校园网（认证服务器 IP 请导入后改成校内通知的地址，原仓库由用户输入且无固定默认值）的直连登录：GET /eportal/?c=Portal&a=login 提交明文表单。按原实现账号拼接为「,0,学号@telecom」（电信线路口径，其他线路改「准备账号」步骤），wlan_ac_name=PTXY-Core 为紫霄校区口径，学园校区需调整。导入后先把登录地址里的 10.0.0.1 改为本校认证服务器 IP。改编自 XilinGuo/automatic_login_Drcom（GPL-2.0），随本仓库以 AGPL-3.0 分发，未实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var ts = String(Math.floor(now_ms()));\n  return { ua: url_encode(\",0,\" + (ctx.username || \"\") + \"@telecom\"), ep: url_encode(ctx.password || \"\"), ts: ts, callback: \"dr\" + ts };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://10.0.0.1:801/eportal/?c=Portal&a=login&callback={callback}&login_method=1&user_account={ua}&user_password={ep}&wlan_user_ip={local_ip}&wlan_user_mac=000000000000&wlan_ac_ip=&wlan_ac_name=PTXY-Core&jsVersion=3.0&_={ts}"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "XilinGuo",
+    "school": "莆田学院",
+    "device": "Dr.COM eportal（dr1003，明文）",
+    "protocol": "GET :801/eportal/?c=Portal&a=login（user_account=,0,学号@telecom，明文，wlan_ac_name=PTXY-Core）",
+    "source": "https://github.com/XilinGuo/automatic_login_Drcom",
+    "license": "GPL-2.0"
+  },
+  "version": "1.0.0"
+}

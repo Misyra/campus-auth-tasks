@@ -1,0 +1,53 @@
+{
+  "type": "http",
+  "task_id": "yzu",
+  "name": "扬州大学校园网直连（锐捷 ePortal 明文）",
+  "description": "适用于扬州大学校园网锐捷 ePortal 门户的直连登录：先 GET http://123.123.123.123 从跳转页提取门户主机与 queryString，再 POST /eportal/InterFace.do?method=login 明文表单（passwordEncrypt=false）。service 按方案的「运营商」字段映射（校园网→学校互联网服务、移动→移动互联网服务、联通→联通互联网服务、电信→电信互联网服务，选「自定义」时填写的服务名原样提交），并按原实现做了双重 URL 编码。改编自 luoboQAQ/yzu-campusnet-login（MIT），未在校园网环境实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "probe",
+      "name": "探测门户地址",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://123.123.123.123/",
+      "extracts": [
+        {
+          "source": "regex:href='http://([^/'\"]+)/",
+          "name": "portal_host"
+        },
+        {
+          "source": "regex:href='[^?']*\\?([^']+)",
+          "name": "queryString"
+        }
+      ]
+    },
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var MAP = { \"校园网\": \"学校互联网服务\", \"移动\": \"移动互联网服务\", \"联通\": \"联通互联网服务\", \"电信\": \"电信互联网服务\" };\n  var isp = (ctx.isp || \"\").trim();\n  var service = isp ? (MAP[isp] !== undefined ? MAP[isp] : isp) : \"学校互联网服务\";\n  if (!ctx.vars.portal_host) throw new Error(\"未能从跳转页提取门户主机，请核对本校门户地址\");\n  return { eu: url_encode(ctx.username || \"\"), ep: url_encode(ctx.password || \"\"), eservice: url_encode(url_encode(service)), qse: url_encode(ctx.vars.queryString || \"\") };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "POST",
+      "url": "http://{portal_host}/eportal/InterFace.do?method=login",
+      "headers": "Content-Type: application/x-www-form-urlencoded",
+      "body": "userId={eu}&password={ep}&service={eservice}&queryString={qse}&operatorPwd=&operatorUserId=&validcode=&passwordEncrypt=false"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "luoboQAQ",
+    "school": "扬州大学",
+    "device": "锐捷 ePortal（InterFace.do，明文）",
+    "protocol": "GET http://123.123.123.123 提取门户地址与 queryString → POST /eportal/InterFace.do?method=login（passwordEncrypt=false）",
+    "source": "https://github.com/luoboQAQ/yzu-campusnet-login",
+    "license": "MIT"
+  },
+  "version": "1.0.0"
+}

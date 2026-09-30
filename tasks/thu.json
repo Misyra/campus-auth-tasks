@@ -1,0 +1,77 @@
+{
+  "type": "http",
+  "task_id": "thu",
+  "name": "清华大学校园网直连（深澜 SRUN）",
+  "description": "适用于清华大学 TUNet 深澜门户（auth4.tsinghua.edu.cn，IPv6 为 auth6）的直连登录：ac_id 先从 login.tsinghua.edu.cn 跳转地址自动解析（解析失败时把「计算深澜签名」里的 ctx.vars.ac_id 改为本校固定值），challenge 与登录均带 double_stack=1；ip 口径为 GoAuthing 未传 -ip 时的空串（libauth/requests.go anotherIP=\"\"），info 内层 JSON 按 Go map 字典序（acid/enc_ver/ip/password/username）。与常见 srun 实现的差异：hmd5 取 md5(密码)（GoAuthing 口径，requests.go buildLoginParams 的 %032x md5.Sum），info 的 QuirkBase64 按标准 srun 自定义字母表处理，若报 info/chksum 校验错误请反馈核对。校园网专属账号在账号后加 @tsinghua。改编自 z4yx/GoAuthing（GPL-3.0），随本仓库以 AGPL-3.0 分发，未实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "portal",
+      "name": "取门户 ac_id",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://login.tsinghua.edu.cn/index_1.html",
+      "extracts": [
+        {
+          "source": "header:Location",
+          "name": "portal_url"
+        }
+      ],
+      "stop_on_redirect": true,
+      "on_error": "continue"
+    },
+    {
+      "id": "acid",
+      "name": "解析 ac_id",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var u = ctx.vars.portal_url || \"\";\n  var m = u.match(/[?&]ac_id=(\\d+)/);\n  if (!m) throw new Error(\"未能从门户跳转地址解析 ac_id，请把「计算深澜签名」步骤里的 ctx.vars.ac_id 改为本校固定 ac_id\");\n  return { ac_id: m[1] };\n}"
+    },
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var MAP = {};\n  var suffix = \"\";\n  var isp = (ctx.isp || \"\").trim();\n  if (isp) { suffix = MAP[isp] !== undefined ? MAP[isp] : (isp.charAt(0) === \"@\" ? isp : \"\"); }\n  var full = (ctx.username || \"\") + suffix;\n  return { full_username: full, encoded_username: url_encode(full), callback: \"jsonp\" + Math.floor(now_ms()) };\n}"
+    },
+    {
+      "id": "challenge",
+      "name": "获取 challenge",
+      "kind": "request",
+      "method": "GET",
+      "url": "https://auth4.tsinghua.edu.cn/cgi-bin/get_challenge?callback={callback}&username={encoded_username}&ip=&double_stack=1",
+      "extracts": [
+        {
+          "source": "regex:\"challenge\"\\s*:\\s*\"([^\"]+)\"",
+          "name": "challenge"
+        }
+      ]
+    },
+    {
+      "id": "sign",
+      "name": "计算深澜签名",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var acId = ctx.vars.ac_id || \"1\";\n  var n = \"200\";\n  var type = \"1\";\n  var ip = \"\"; // GoAuthing 未传 -ip 时 anotherIP 为空串（libauth/requests.go buildChallengeParams/buildLoginParams）\n  var token = ctx.vars.challenge;\n  var full = ctx.vars.full_username || (ctx.username || \"\");\n  var info = srun_info(JSON.stringify({ acid: acId, enc_ver: \"srun_bx1\", ip: ip, password: ctx.password, username: full }), token);\n    var hmd5 = md5(ctx.password);\n  var checksum = sha1(token + full + token + hmd5 + token + acId + token + ip + token + n + token + type + token + info);\n  return { encoded_username: url_encode(full), encoded_password: url_encode(\"{MD5}\" + hmd5), encoded_info: url_encode(info), checksum: checksum, ac_id: acId, n: n, protocol_type: type, login_ip: ip };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "GET",
+      "url": "https://auth4.tsinghua.edu.cn/cgi-bin/srun_portal?callback={callback}&action=login&username={encoded_username}&password={encoded_password}&ac_id={ac_id}&ip=&chksum={checksum}&info={encoded_info}&n={n}&type={protocol_type}&double_stack=1",
+      "headers": "Accept: application/json, text/javascript, */*"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "failure_pattern": "\"error\":\"login_error\"",
+  "failure_action": "credential",
+  "metadata": {
+    "author": "z4yx",
+    "school": "清华大学",
+    "device": "深澜 SRUN BX1",
+    "protocol": "get_challenge → {MD5}+hmd5 / srun_info / SHA1 chksum → srun_portal",
+    "source": "https://github.com/z4yx/GoAuthing",
+    "license": "GPL-3.0"
+  },
+  "version": "1.0.0"
+}

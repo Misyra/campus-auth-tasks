@@ -1,0 +1,16 @@
+name: 校验任务索引
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: 校验统一索引与生成文件
+        run: python tools/build-index.py --check

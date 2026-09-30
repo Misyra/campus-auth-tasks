@@ -1,0 +1,34 @@
+{
+  "type": "http",
+  "task_id": "ahut",
+  "name": "安徽理工大学校园网直连（Dr.COM 表单）",
+  "description": "适用于安徽理工大学校园网（10.255.0.19）的直连登录：GET /drcom/login 提交 4 个参数（callback=dr1003、DDDDD、upass、0MKKey=123456），明文密码。账号需要运营商后缀时选「自定义」填关键字（如 @cmcc），会自动拼在学号后；不选则按原账号提交。原仓库会连续登录两次以解除宽带限速，可在认证喵里再手动执行一次。改编自 nyakang/AutoLogin（MIT），未在校园网环境实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var MAP = {};\n  var suffix = \"\";\n  var isp = (ctx.isp || \"\").trim();\n  if (isp) { suffix = MAP[isp] !== undefined ? MAP[isp] : (isp.charAt(0) === \"@\" ? isp : \"\"); }\n  var full = (ctx.username || \"\") + suffix;\n  var out = { form_username: url_encode(full), form_password: url_encode(ctx.password || \"\") };\n  \n  return out;\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://10.255.0.19/drcom/login?callback=dr1003&DDDDD={form_username}&upass={form_password}&0MKKey=123456"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "nyakang",
+    "school": "安徽理工大学",
+    "device": "Dr.COM eportal（dr1003，明文）",
+    "protocol": "GET /drcom/login?callback=dr1003&DDDDD=学号[@后缀]&upass=…&0MKKey=123456",
+    "source": "https://github.com/nyakang/AutoLogin",
+    "license": "MIT"
+  },
+  "version": "1.0.0"
+}

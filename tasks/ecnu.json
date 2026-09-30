@@ -1,0 +1,36 @@
+{
+  "type": "http",
+  "task_id": "ecnu",
+  "name": "华东师范大学校园网直连（明文门户 POST）",
+  "description": "适用于华东师范大学网络验证系统（login.ecnu.edu.cn）的直连登录。该校为老版 srun_portal_pc.php 明文表单：单个 POST 提交 action=login 与明文账号密码（ac_id=4），不走 get_challenge 加密链路，成功与否由登录后的网络检测判定。原仓库的 daemon 定时重登由认证喵的定时任务承担。改编自 johnnychen94/ecnu-net-login（MIT），未在校园网环境实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var MAP = {};\n  var suffix = \"\";\n  var isp = (ctx.isp || \"\").trim();\n  if (isp) { suffix = MAP[isp] !== undefined ? MAP[isp] : (isp.charAt(0) === \"@\" ? isp : \"\"); }\n  var full = (ctx.username || \"\") + suffix;\n  var out = { form_username: url_encode(full), form_password: url_encode(ctx.password || \"\") };\n  \n  return out;\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "POST",
+      "url": "https://login.ecnu.edu.cn/srun_portal_pc.php?ac_id=4",
+      "headers": "Content-Type: application/x-www-form-urlencoded",
+      "body": "action=login&username={form_username}&password={form_password}&ac_id=4&save_me=0&ajax=1"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "johnnychen94",
+    "school": "华东师范大学",
+    "device": "深澜（老版明文表单 srun_portal_pc.php）",
+    "protocol": "POST /srun_portal_pc.php?ac_id=4（action=login，明文账号密码）",
+    "source": "https://github.com/johnnychen94/ecnu-net-login",
+    "license": "MIT"
+  },
+  "version": "1.0.0"
+}

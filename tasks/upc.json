@@ -1,0 +1,50 @@
+{
+  "type": "http",
+  "task_id": "upc",
+  "name": "中国石油大学（华东）校园网直连（锐捷 ePortal 明文）",
+  "description": "适用于中国石油大学（华东）校园网（无线 121.251.251.217，有线备 121.251.251.207）的直连登录：按原实现先 POST 带魔法路径 /&userlocation=ethtrunk/62:3501.0 的探测请求取跳转地址，解析 queryString 后 POST /eportal/InterFace.do?method=login 明文表单。运营商映射：校园网→default、移动→cmcc、联通→unicom、电信→ctcc，映射表在「解析 queryString」步骤开头可改；探测无响应时把两处主机换成 207。改编自 EndangeredF1sh/UPCNet（AGPL-3.0），随本仓库以 AGPL-3.0 分发，未实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "probe",
+      "name": "探测门户",
+      "kind": "request",
+      "method": "POST",
+      "url": "http://121.251.251.217/&userlocation=ethtrunk/62:3501.0",
+      "extracts": [
+        {
+          "source": "header:Location",
+          "name": "portal_url"
+        }
+      ],
+      "stop_on_redirect": true
+    },
+    {
+      "id": "prepare",
+      "name": "解析 queryString",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var u = ctx.vars.portal_url || \"\";\n  if (!u || u.indexOf(\"?\") < 0) throw new Error(\"未能获取门户跳转地址（Location），请核对本校门户地址后把地址写进本步骤脚本\");\n  var q = u.slice(u.indexOf(\"?\") + 1);\n  var host = u.split(\"/\")[2];\n  var MAP = {\"校园网\": \"default\", \"移动\": \"cmcc\", \"联通\": \"unicom\", \"电信\": \"ctcc\"};\n  var isp = (ctx.isp || \"\").trim();\n  var service = isp ? (MAP[isp] !== undefined ? MAP[isp] : isp) : \"default\";\n  return { portal_host: host, qse: url_encode(url_encode(q)), eu: url_encode(ctx.username || \"\"), ep: url_encode(ctx.password || \"\"), es: url_encode(service) }; // 原实现 NetworkAuth.py L23 先 quote(query)，requests data= 提交时再整体编码一次 => 双重编码\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "POST",
+      "url": "http://121.251.251.217/eportal/InterFace.do?method=login",
+      "headers": "Content-Type: application/x-www-form-urlencoded",
+      "body": "userId={eu}&password={ep}&service={es}&queryString={qse}&operatorPwd=&operatorUserId=&validcode=&passwordEncrypt=false"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "EndangeredF1sh",
+    "school": "中国石油大学（华东）",
+    "device": "锐捷 ePortal（InterFace.do，明文）",
+    "protocol": "POST 探测（userlocation 魔法路径）取跳转 query → POST /eportal/InterFace.do?method=login",
+    "source": "https://github.com/EndangeredF1sh/UPCNet",
+    "license": "AGPL-3.0"
+  },
+  "version": "1.0.0"
+}

@@ -1,0 +1,34 @@
+{
+  "type": "http",
+  "task_id": "gzy",
+  "name": "赣州职业技术学院校园网直连（Dr.COM eportal）",
+  "description": "适用于赣州职业技术学院教学楼区 Dr.COM eportal 门户（192.168.100.2:801）的直连登录：GET /eportal/portal/login 提交明文账号密码（callback=dr1003、login_method=1）。改编自 xiataoboy/GZYDRCOM（Apache-2.0），未在校园网环境实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "准备账号",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var MAP = {};\n  var suffix = \"\";\n  var isp = (ctx.isp || \"\").trim();\n  if (isp) { suffix = MAP[isp] !== undefined ? MAP[isp] : (isp.charAt(0) === \"@\" ? isp : \"\"); }\n  var full = (ctx.username || \"\") + suffix;\n  var out = { form_username: url_encode(full), form_password: url_encode(ctx.password || \"\") };\n  \n  return out;\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://192.168.100.2:801/eportal/portal/login?callback=dr1003&login_method=1&user_account={form_username}&user_password={form_password}"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "xiataoboy",
+    "school": "赣州职业技术学院",
+    "device": "Dr.COM eportal（dr1003，明文）",
+    "protocol": "GET :801/eportal/portal/login?callback=dr1003&login_method=1&user_account=…&user_password=…（明文）",
+    "source": "https://github.com/xiataoboy/GZYDRCOM",
+    "license": "Apache-2.0"
+  },
+  "version": "1.0.0"
+}

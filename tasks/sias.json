@@ -1,0 +1,44 @@
+{
+  "type": "http",
+  "task_id": "sias",
+  "name": "郑州西亚斯学院校园网直连（H3C ac_portal RC4）",
+  "description": "适用于 SIAS 校园网 H3C ac_portal 门户（2.2.2.3）的直连登录：先 GET 门户页种 Cookie，再 POST /ac_portal/login.php（opr=pwdLogin），密码用 RC4 加密（密钥为本次请求的毫秒时间戳 auth_tag，十六进制输出），RC4 实现按原仓库移植写在计算步骤里。改编自 LeeAstra/autologin-sias（MIT），未在校园网环境实测。",
+  "schema_version": 2,
+  "auth_url": "",
+  "steps": [
+    {
+      "id": "portal",
+      "name": "打开门户页",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://2.2.2.3/ac_portal/20210120210326/pc.html",
+      "on_error": "continue"
+    },
+    {
+      "id": "prepare",
+      "name": "RC4 加密密码",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var auth_tag = String(Math.floor(now_ms()));\n  var key = [];\n  for (var i = 0; i < 256; i++) { key.push(auth_tag.charCodeAt(i % auth_tag.length)); }\n  var sbox = [];\n  for (var i = 0; i < 256; i++) { sbox[i] = i; }\n  var j = 0;\n  for (var i = 0; i < 256; i++) { j = (j + sbox[i] + key[i]) % 256; var t = sbox[i]; sbox[i] = sbox[j]; sbox[j] = t; }\n  var text = ctx.password || \"\";\n  var a = 0, b = 0, out = \"\";\n  for (var i = 0; i < text.length; i++) {\n    a = (a + 1) % 256;\n    b = (b + sbox[a]) % 256;\n    var t2 = sbox[a]; sbox[a] = sbox[b]; sbox[b] = t2;\n    var c = (sbox[a] + sbox[b]) % 256;\n    var x = text.charCodeAt(i) ^ sbox[c];\n    out += (x < 16 ? \"0\" : \"\") + x.toString(16);\n  }\n  return { auth_tag: auth_tag, rc4_pwd: out, form_username: url_encode(ctx.username || \"\") };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "POST",
+      "url": "http://2.2.2.3/ac_portal/login.php",
+      "headers": "Content-Type: application/x-www-form-urlencoded\nX-Requested-With: XMLHttpRequest",
+      "body": "opr=pwdLogin&userName={form_username}&pwd={rc4_pwd}&auth_tag={auth_tag}&rememberPwd=0"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "metadata": {
+    "author": "LeeAstra",
+    "school": "郑州西亚斯学院（SIAS，README 仅称 SIAS）",
+    "device": "H3C ac_portal（RC4）",
+    "protocol": "GET pc.html 种 Cookie → POST /ac_portal/login.php（pwd=RC4(密码, 毫秒时间戳) hex）",
+    "source": "https://github.com/LeeAstra/autologin-sias",
+    "license": "MIT"
+  },
+  "version": "1.0.0"
+}
