@@ -302,14 +302,14 @@
   {
     "id": "lzu",
     "name": "兰州大学校园网直连（深澜 SRUN）",
-    "description": "深澜标准三步直连（网关 10.10.0.166，ac_id=2，附带空 nas_ip/captchaVal 参数）。改编自 FallenSigh/LZUSrunCLI（MIT），未实测。",
+    "description": "深澜 SRUN 直连（网关 10.10.0.166，ac_id=2），账号填写完整后缀，例如 @study。改编自 FallenSigh/LZUSrunCLI（MIT），已在认证喵 5.1.2 Windows 版校园网环境验证登录成功。",
     "tags": [
       "兰州大学",
       "LZU",
       "深澜"
     ],
     "author": "FallenSigh",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "http",
     "source": "https://github.com/FallenSigh/LZUSrunCLI",
     "license": "MIT",
