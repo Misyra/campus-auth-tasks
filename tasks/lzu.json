@@ -2,15 +2,15 @@
   "type": "http",
   "task_id": "lzu",
   "name": "兰州大学校园网直连（深澜 SRUN）",
-  "description": "适用于兰州大学深澜门户（10.10.0.166）的直连登录，标准流程并按原实现附带空的 nas_ip / captchaVal / ap_id / ap_ip 参数与 os=Android / name=Smartphones/PDAs/Tablets / double_stack=0 / 时间戳 _（utils.cpp get_os 固定返回 Android 口径）（ac_id=2）。eLearning 等带后缀账号（如 @study）直接把后缀写在账号里。改编自 FallenSigh/LZUSrunCLI（MIT），未在校园网环境实测。",
+  "description": "适用于兰州大学深澜门户（10.10.0.166，ac_id=2）。账号填写完整后缀，例如 @study。改编自 FallenSigh/LZUSrunCLI（MIT），已在认证喵 5.1.2 Windows 版校园网环境验证登录成功。",
   "schema_version": 2,
-  "auth_url": "",
+  "auth_url": "http://10.10.0.166/",
   "steps": [
     {
       "id": "prepare",
       "name": "准备账号",
       "kind": "transform",
-      "script": "function transform(ctx) {\n  var MAP = {};\n  var suffix = \"\";\n  var isp = (ctx.isp || \"\").trim();\n  if (isp) { suffix = MAP[isp] !== undefined ? MAP[isp] : (isp.charAt(0) === \"@\" ? isp : \"\"); }\n  var full = (ctx.username || \"\") + suffix;\n  return { full_username: full, encoded_username: url_encode(full), callback: \"jsonp\" + Math.floor(now_ms()), ts: Math.floor(now_ms()), ts3: Math.floor(now_ms()) + 3 };\n}"
+      "script": "function transform(ctx) {\n  var full = ctx.username.trim();\n  if (!full) throw new Error(\"校园网账号不能为空\");\n  var timestamp = String(Math.floor(now_ms()));\n  return { full_username: full, encoded_username: url_encode(full), callback: \"jQuery\" + timestamp + \"0000_\" + timestamp, ts: timestamp };\n}"
     },
     {
       "id": "challenge",
@@ -18,9 +18,10 @@
       "kind": "request",
       "method": "GET",
       "url": "http://10.10.0.166/cgi-bin/get_challenge?callback={callback}&username={encoded_username}&ip={local_ip}&_={ts}",
+      "headers": "Accept: application/json, text/javascript, */*",
       "extracts": [
         {
-          "source": "regex:\"challenge\"\\s*:\\s*\"([^\"]+)\"",
+          "source": "json:challenge",
           "name": "challenge"
         }
       ]
@@ -29,19 +30,20 @@
       "id": "sign",
       "name": "计算深澜签名",
       "kind": "transform",
-      "script": "function transform(ctx) {\n  var acId = \"2\";\n  var n = \"200\";\n  var type = \"1\";\n  var ip = ctx.local_ip;\n  if (!ip) throw new Error(\"无法获取本机 IP，请确认已连接校园网\");\n  var token = ctx.vars.challenge;\n  var full = ctx.vars.full_username || (ctx.username || \"\");\n  var info = srun_info(JSON.stringify({ username: full, password: ctx.password, ip: ip, acid: acId, enc_ver: \"srun_bx1\" }), token);\n  var hmd5 = hmac_md5(token, ctx.password);\n  var checksum = sha1(token + full + token + hmd5 + token + acId + token + ip + token + n + token + type + token + info);\n  return { encoded_username: url_encode(full), encoded_password: url_encode(\"{MD5}\" + hmd5), encoded_info: url_encode(info), checksum: checksum, ac_id: acId, n: n, protocol_type: type, login_ip: ip };\n}"
+      "script": "function transform(ctx) {\n  var acId = \"2\";\n  var n = \"200\";\n  var type = \"1\";\n  var ip = ctx.local_ip;\n  if (!ip) throw new Error(\"无法获取本机 IP，请确认已连接校园网\");\n  var token = ctx.vars.challenge;\n  if (!token) throw new Error(\"认证服务器没有返回 challenge\");\n  var full = ctx.vars.full_username;\n  var info = srun_info(JSON.stringify({ username: full, password: ctx.password, ip: ip, acid: acId, enc_ver: \"srun_bx1\" }), token);\n  var hmd5 = hmac_md5(token, ctx.password);\n  var checksum = sha1(token + full + token + hmd5 + token + acId + token + ip + token + n + token + type + token + info);\n  var timestamp = String(Math.floor(now_ms()));\n  return { encoded_username: url_encode(full), encoded_password: url_encode(\"{MD5}\" + hmd5), encoded_info: url_encode(info), checksum: checksum, ac_id: acId, n: n, protocol_type: type, login_ip: ip, login_callback: \"jQuery\" + timestamp + \"0000_\" + timestamp, login_ts: timestamp };\n}"
     },
     {
       "id": "login",
       "name": "提交登录请求",
       "kind": "request",
       "method": "GET",
-      "url": "http://10.10.0.166/cgi-bin/srun_portal?callback={callback}&action=login&username={encoded_username}&password={encoded_password}&ac_id={ac_id}&ip={login_ip}&chksum={checksum}&info={encoded_info}&n={n}&type={protocol_type}&nas_ip=&captchaVal=&ap_id=&ap_ip=&os=Android&name=Smartphones%2FPDAs%2FTablets&double_stack=0&_={ts3}",
+      "url": "http://10.10.0.166/cgi-bin/srun_portal?callback={login_callback}&action=login&username={encoded_username}&password={encoded_password}&ac_id={ac_id}&ip={login_ip}&chksum={checksum}&info={encoded_info}&n={n}&type={protocol_type}&nas_ip=&captchaVal=&ap_id=&ap_ip=&os=Android&name=Smartphones%2FPDAs%2FTablets&double_stack=0&_={login_ts}",
       "headers": "Accept: application/json, text/javascript, */*"
     }
   ],
   "result_step_id": "login",
-  "success_check": "network",
+  "success_check": "response",
+  "success_pattern": "\"error\":\"ok\"",
   "failure_pattern": "\"error\":\"login_error\"",
   "failure_action": "credential",
   "metadata": {
@@ -52,5 +54,5 @@
     "source": "https://github.com/FallenSigh/LZUSrunCLI",
     "license": "MIT"
   },
-  "version": "1.0.0"
+  "version": "1.0.1"
 }
