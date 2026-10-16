@@ -1,0 +1,50 @@
+{
+  "type": "http",
+  "task_id": "cjxy",
+  "name": "昌吉学院校园网直连（深澜 SRUN）",
+  "description": "适用于昌吉学院深澜 SRUN 门户（网关 219.247.65.252，ac_id=2，AC 名 PA）。get_challenge 取挑战值后按 {MD5}+HMAC-MD5、srun_info(srun_bx1)、SHA1 chksum 提交 srun_portal。ac_id 取自网关劫持跳转：index_2.html?...&wlanacname=PA&paip=219.247.79.133 会跳到 /srun_portal_pc?ac_id=2，用错（如 ac_id=1）会被门户拒绝为 login_error「Nas type not found.」；换接入设备时改「计算深澜签名」步骤开头的 acId 即可。已在校园网实测（注销后全新登录成功）。",
+  "schema_version": 2,
+  "auth_url": "http://219.247.65.252/srun_portal_pc?ac_id=2&theme=pro",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "编码账号",
+      "kind": "transform",
+      "script": "function transform(ctx) { return { encoded_username: url_encode(ctx.username), callback: 'jQuery1124_' + now_ms() }; }"
+    },
+    {
+      "id": "challenge",
+      "name": "获取 challenge",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://219.247.65.252/cgi-bin/get_challenge?callback={callback}&username={encoded_username}&ip={local_ip}",
+      "extracts": [{ "source": "regex:\"challenge\"\\s*:\\s*\"([^\"]+)\"", "name": "challenge" }]
+    },
+    {
+      "id": "sign",
+      "name": "计算深澜签名",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  // 昌吉学院：ac_id=2（AC 名 PA / paip 219.247.79.133）。换接入设备时改这里的 acId。\n  const acId = '2';\n  const n = '200';\n  const type = '1';\n  const ip = ctx.local_ip;\n  if (!ip) throw new Error('无法读取本机 IPv4，请检查校园网接口');\n  const token = ctx.vars.challenge;\n  const info = srun_info(JSON.stringify({ username: ctx.username, password: ctx.password, ip: ip, acid: acId, enc_ver: 'srun_bx1' }), token);\n  const hmd5 = hmac_md5(token, ctx.password);\n  const checksum = sha1(token + ctx.username + token + hmd5 + token + acId + token + ip + token + n + token + type + token + info);\n  return { encoded_username: url_encode(ctx.username), encoded_password: url_encode('{MD5}' + hmd5), encoded_info: url_encode(info), checksum: checksum, ac_id: acId, n: n, protocol_type: type };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://219.247.65.252/cgi-bin/srun_portal?callback={callback}&action=login&username={encoded_username}&password={encoded_password}&ac_id={ac_id}&ip={local_ip}&chksum={checksum}&info={encoded_info}&n={n}&type={protocol_type}",
+      "headers": "Accept: application/json, text/javascript, */*"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "failure_pattern": "\"error\":\"login_error\"",
+  "failure_action": "credential",
+  "metadata": {
+    "author": "Osmamli",
+    "school": "昌吉学院",
+    "device": "深澜 SRUN",
+    "protocol": "get_challenge → {MD5}+HMAC-MD5 / srun_info(srun_bx1) / SHA1 chksum → srun_portal",
+    "note": "网关 219.247.65.252，ac_id=2（AC 名 PA / paip 219.247.79.133），n=200，type=1，enc_ver=srun_bx1"
+  },
+  "version": "1.0.0"
+}
