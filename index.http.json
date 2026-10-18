@@ -810,5 +810,20 @@
     "version": "1.0.0",
     "type": "http",
     "url": "https://raw.githubusercontent.com/Misyra/campus-auth-tasks/master/tasks/cjxy.json"
+  },
+  {
+    "id": "czu",
+    "name": "常州工学院校园网登录",
+    "description": "直连渠道：GET /eportal/portal/login，账号需带 \",0,\" 域前缀并拼接运营商后缀（@cmcc / @unicom / @telecom，校园网不拼）。适用于常州工学院（锐捷 ePortal，172.19.0.1:801）；该校每日 00:00–00:10 断网，建议网络检测间隔设为 600 秒以上",
+    "tags": [
+      "常州工学院",
+      "CZU",
+      "锐捷",
+      "ePortal"
+    ],
+    "author": "云天天",
+    "version": "1.0.0",
+    "type": "http",
+    "url": "https://raw.githubusercontent.com/Misyra/campus-auth-tasks/master/tasks/czu.json"
   }
 ]

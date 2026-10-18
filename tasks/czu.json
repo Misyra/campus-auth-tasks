@@ -1,0 +1,51 @@
+{
+  "type": "http",
+  "task_id": "czu",
+  "name": "常州工学院校园网登录",
+  "description": "直连渠道：GET /eportal/portal/login 提交，账号须带锐捷要求的 \",0,\" 域前缀并拼接运营商后缀（@cmcc / @unicom / @telecom，校园网不拼），密码走查询串。适用于常州工学院校园网（锐捷 ePortal，172.19.0.1:801），请先在自服务系统完成运营商宽带账号绑定。注意：该校每日 00:00–00:10 禁止上网，建议把网络检测间隔设为 600 秒以上，减少该时段的无谓认证尝试。",
+  "version": "1.0.0",
+  "schema_version": 2,
+  "auth_url": "http://172.19.0.1:801",
+  "steps": [
+    {
+      "id": "prepare",
+      "name": "拼接运营商后缀",
+      "kind": "transform",
+      "script": "function transform(ctx) {\n  var rawIsp = (ctx.isp || \"\").replace(/^\\s+|\\s+$/g, \"\");\n\n  // 运营商关键字 -> 账号后缀（锐捷 ePortal 以 @cmcc / @unicom / @telecom 区分线路）\n  var suffixMap = {\n    \"校园网\": \"\", \"校内\": \"\", \"校园\": \"\", \"教育网\": \"\", \"campus\": \"\",\n    \"中国移动\": \"@cmcc\", \"移动\": \"@cmcc\", \"cmcc\": \"@cmcc\", \"mobile\": \"@cmcc\",\n    \"中国联通\": \"@unicom\", \"联通\": \"@unicom\", \"unicom\": \"@unicom\", \"cu\": \"@unicom\",\n    \"中国电信\": \"@telecom\", \"电信\": \"@telecom\", \"telecom\": \"@telecom\", \"ct\": \"@telecom\"\n  };\n\n  var suffix = \"\";\n  if (rawIsp.charAt(0) === \"@\") {\n    suffix = rawIsp;\n  } else if (suffixMap[rawIsp] !== undefined) {\n    suffix = suffixMap[rawIsp];\n  } else if (suffixMap[rawIsp.toLowerCase()] !== undefined) {\n    suffix = suffixMap[rawIsp.toLowerCase()];\n  }\n\n  // \",0,\" 域前缀固定写在请求地址里，这里只负责学号与运营商后缀\n  var u = String(ctx.username || \"\").replace(/^\\s+|\\s+$/g, \"\");\n  if (/^,0,/.test(u)) {\n    u = u.slice(3);\n  }\n  if (u.indexOf(\"@\") === -1) {\n    u = u + suffix;\n  }\n\n  return {\n    username: u,\n    password: url_encode(ctx.password)\n  };\n}"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://172.19.0.1:801/eportal/portal/login?callback=dr1003&login_method=1&user_account=,0,{username}&user_password={password}&wlan_user_ip={local_ip}&wlan_user_ipv6=&wlan_user_mac=000000000000&wlan_ac_ip=&wlan_ac_name=&jsVersion=4.2.1&terminal_type=1&lang=zh-cn&v=5911",
+      "headers": "Accept: */*\nAccept-Language: zh-CN,zh;q=0.9\nX-Requested-With: XMLHttpRequest\nReferer: {auth_url}/\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+    }
+  ],
+  "result_step_id": "login",
+  "success_pattern": "\"result\":1",
+  "failure_pattern": "\"result\":0",
+  "failure_action": "credential",
+  "success_check": "response",
+  "logout_request": {
+    "method": "GET",
+    "url": "http://172.19.0.1:801/eportal/portal/logout?callback=dr1003&login_method=1&user_account=drcom&user_password=123&ac_logout=1&register_mode=1&wlan_user_ip={local_ip}&wlan_user_ipv6=&wlan_vlan_id=1&wlan_user_mac=000000000000&wlan_ac_ip=&wlan_ac_name=&jsVersion=4.2.1&v=5911",
+    "headers": "Accept: */*\nReferer: {auth_url}/\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0",
+    "body": "",
+    "wait_secs": 2
+  },
+  "ignore_https_errors": false,
+  "metadata": {
+    "author": "云天天",
+    "school": "常州工学院",
+    "device": "锐捷 ePortal（RG-SAM，/eportal/portal/login，dr1003 回调）",
+    "protocol": "GET /eportal/portal/login?callback=dr1003&login_method=1&user_account=,0,学号[@后缀]&user_password=…&wlan_user_ip=本机IP&jsVersion=4.2.1，返回 JSONP dr1003({\"result\":1})",
+    "notes": [
+      "账号格式为 \",0,学号@后缀\"，缺少 \",0,\" 域前缀时门户返回 {\"result\":0,\"msg\":\"无法获取用户认证账号！\"}",
+      "该接口只从查询串取参，POST 表单体会被忽略，因此必须用 GET",
+      "logout 请求中的 user_account=drcom 与 user_password=123 是锐捷强制下线的协议固定值，不是真实凭据",
+      "运营商后缀映射在凭据变换脚本里，方案的运营商字段直接可用；校园网不拼后缀",
+      "密码以查询串形式发送是该门户的接口要求，程序日志与网关可能记录完整 URL"
+    ]
+  }
+}
