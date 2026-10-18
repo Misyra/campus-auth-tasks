@@ -798,6 +798,20 @@
     "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/ptxy.json"
   },
   {
+    "id": "cjxy",
+    "name": "昌吉学院校园网直连（深澜 SRUN）",
+    "description": "深澜 SRUN 标准三步直连（网关 219.247.65.252，ac_id=2，AC 名 PA）。ac_id 取自网关劫持跳转，用错会被门户拒绝为 login_error「Nas type not found.」；换接入设备时改「计算深澜签名」步骤里的 acId。已在校园网实测（注销后全新登录成功）。",
+    "tags": [
+      "昌吉学院",
+      "CJXY",
+      "深澜"
+    ],
+    "author": "Osmamli",
+    "version": "1.0.0",
+    "type": "http",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/cjxy.json"
+  },
+  {
     "id": "czu",
     "name": "常州工学院校园网登录",
     "description": "直连渠道：GET /eportal/portal/login，账号需带 \",0,\" 域前缀并拼接运营商后缀（@cmcc / @unicom / @telecom，校园网不拼）。适用于常州工学院（锐捷 ePortal，172.19.0.1:801）；该校每日 00:00–00:10 断网，建议网络检测间隔设为 600 秒以上",
