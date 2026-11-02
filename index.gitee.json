@@ -8,7 +8,7 @@
       "推荐"
     ],
     "author": "Misyra",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/default.json",
     "type": "browser"
   },
@@ -951,5 +951,31 @@
     "version": "1.0.0",
     "type": "http",
     "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/czu.json"
+  },
+  {
+    "id": "gdou",
+    "name": "广东海洋大学校园网登录",
+    "description": "适用于广东海洋大学校园网认证页面：该页用户协议元素为 #protocol，通用任务的语义勾选未能命中，本任务在登录前显式点击 #protocol 勾选协议，其余流程与通用任务一致",
+    "tags": [
+      "广东海洋大学",
+      "GDOU"
+    ],
+    "author": "SirwJed420",
+    "version": "1.0.0",
+    "type": "browser",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/gdou.json"
+  },
+  {
+    "id": "hngy",
+    "name": "河南工业职业技术大学校园网登录",
+    "description": "适用于河南工业职业技术大学认证页面（提交者描述为自研门户 ePortal 页面，无运营商选择、无验证码）：先点击密码占位元素 #pwd_hk_posi 激活真实输入框，再输入密码并点击 #loginLink_div 登录",
+    "tags": [
+      "河南工业职业技术大学",
+      "HNGY"
+    ],
+    "author": "fjy061129",
+    "version": "1.0.0",
+    "type": "browser",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/hngy.json"
   }
 ]
