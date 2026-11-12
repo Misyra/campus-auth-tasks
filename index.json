@@ -977,5 +977,19 @@
     "version": "1.0.0",
     "type": "browser",
     "url": "https://raw.githubusercontent.com/Misyra/campus-auth-tasks/master/tasks/hngy.json"
+  },
+  {
+    "id": "xauat",
+    "name": "西安建筑科技大学校园网登录（深澜 SRUN）",
+    "description": "适用于西安建筑科技大学深澜门户 ac_id=3：读取门户识别的上网 IP，获取 challenge 后计算签名并登录。若要求图形验证码，请使用浏览器登录。",
+    "tags": [
+      "西安建筑科技大学",
+      "XAUAT",
+      "深澜"
+    ],
+    "author": "TorenoHibiki",
+    "version": "1.0.0",
+    "type": "http",
+    "url": "https://raw.githubusercontent.com/Misyra/campus-auth-tasks/master/tasks/xauat.json"
   }
 ]
