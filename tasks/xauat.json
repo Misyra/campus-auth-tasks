@@ -1,0 +1,91 @@
+{
+  "type": "http",
+  "task_id": "xauat",
+  "name": "西安建筑科技大学校园网登录（深澜 SRUN）",
+  "description": "适用于西安建筑科技大学深澜门户 ac_id=3：读取门户识别的上网 IP，获取 challenge 后计算签名并登录。若要求图形验证码，请使用浏览器登录。",
+  "schema_version": 2,
+  "auth_url": "http://10.99.144.34/srun_portal_pc?ac_id=3&theme=pro",
+  "steps": [
+    {
+      "id": "page",
+      "name": "读取门户识别的上网 IP",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://10.99.144.34/srun_portal_pc?ac_id=3&theme=pro",
+      "extracts": [
+        {
+          "source": "regex:\\bip\\s*:\\s*\"([0-9.]+)\"",
+          "name": "portal_ip"
+        }
+      ]
+    },
+    {
+      "id": "prepare",
+      "name": "准备认证参数",
+      "kind": "transform",
+      "script": "function transform(ctx) { if (!ctx.username || !ctx.password) throw new Error('请先在认证方案中填写账号和密码'); return { encoded_username: url_encode(ctx.username.trim()), callback: 'jQuery1124_' + now_ms() }; }"
+    },
+    {
+      "id": "captcha",
+      "name": "检查是否需要验证码",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://10.99.144.34/v2/srun_portal_captcha_image_info?user_name={encoded_username}&ip={portal_ip}",
+      "extracts": [
+        {
+          "source": "json:code",
+          "name": "captcha_code"
+        },
+        {
+          "source": "json:data",
+          "name": "captcha_required"
+        }
+      ]
+    },
+    {
+      "id": "check_captcha",
+      "name": "检查验证码状态",
+      "kind": "transform",
+      "script": "function transform(ctx) { if (String(ctx.vars.captcha_code) !== '0') throw new Error('无法确认验证码要求，请检查门户状态'); if (String(ctx.vars.captcha_required) === '1') throw new Error('校园网要求图形验证码，请使用浏览器登录方案'); if (String(ctx.vars.captcha_required) !== '0') throw new Error('验证码状态未知，请检查门户状态'); return {}; }"
+    },
+    {
+      "id": "challenge",
+      "name": "获取 challenge",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://10.99.144.34/cgi-bin/get_challenge?callback={callback}&username={encoded_username}&ip={portal_ip}",
+      "extracts": [
+        {
+          "source": "json:challenge",
+          "name": "challenge"
+        }
+      ]
+    },
+    {
+      "id": "sign",
+      "name": "计算深澜签名",
+      "kind": "transform",
+      "script": "function transform(ctx) { const user = ctx.username.trim(), ip = ctx.vars.portal_ip, token = ctx.vars.challenge, ac = '3', n = '200', type = '1'; if (!ip || !token) throw new Error('缺少门户 IP 或 challenge'); const info = srun_info(JSON.stringify({username:user,password:ctx.password,ip:ip,acid:ac,enc_ver:'srun_bx1'}),token); const hmd5 = hmac_md5(token,ctx.password); const checksum = sha1(token+user+token+hmd5+token+ac+token+ip+token+n+token+type+token+info); return {encoded_password:url_encode('{MD5}'+hmd5),encoded_info:url_encode(info),checksum:checksum}; }"
+    },
+    {
+      "id": "login",
+      "name": "提交登录请求",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://10.99.144.34/cgi-bin/srun_portal?callback={callback}&action=login&username={encoded_username}&password={encoded_password}&ac_id=3&ip={portal_ip}&chksum={checksum}&info={encoded_info}&n=200&type=1&double_stack=0&captchaId=&captchaVal=&ap_id=&ap_ip=&mac=&nas_ip=",
+      "headers": "Accept: application/json, text/javascript, */*"
+    }
+  ],
+  "result_step_id": "login",
+  "success_check": "network",
+  "failure_pattern": "\"error\":\"login_error\"",
+  "failure_action": "credential",
+  "metadata": {
+    "author": "TorenoHibiki",
+    "school": "西安建筑科技大学",
+    "device": "深澜 SRUN",
+    "source": "https://github.com/Misyra/campus-auth-tasks/blob/master/tasks/srun-bx1-template.json",
+    "note": "基于 Misyra 的深澜通用模板调整，模板标注来源 https://github.com/Anchor-GitHu/luci-app-srun-login"
+  },
+  "version": "1.0.0"
+}
