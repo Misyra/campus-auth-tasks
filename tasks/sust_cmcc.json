@@ -1,0 +1,131 @@
+{
+  "type": "http",
+  "task_id": "sust_cmcc",
+  "name": "苏州科技大学移动校园网登录",
+  "description": "适用于苏州科技大学移动校园网（江苏移动 wlan.jsyd139.com）。跟随校园网 HTTP 重定向读取当前认证入口与动态 paramStr，复用本次流程的 Cookie，向 /authServlet 提交方案中保存的账号密码，以登录后联网检测判断结果；已联网时不重复提交凭据。需要支持 schema_version: 2 有序 HTTP 流程的认证喵版本。使用限制：用户在 Windows 11、认证喵 5.1.3 上实测，Clash Verge 随开机自启动且同时开启系统代理和 TUN 时登录连接超时，手动关闭 Clash Verge 后自动登录成功。使用前请先退出 Clash Verge，完成校园网认证后再启动代理。认证设备型号未知。",
+  "schema_version": 2,
+  "steps": [
+    {
+      "id": "portal",
+      "name": "跟随校园网重定向获取真实认证参数",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://connect.rom.miui.com/generate_204",
+      "headers": "",
+      "body": "",
+      "extract": "",
+      "extract_as": "",
+      "extracts": [
+        {
+          "source": "regex:(?is)<frame\\b[^>]*name=[\"']mainFrame[\"'][^>]*src=[\"']([^\"']+)[\"']",
+          "name": "portal_path"
+        }
+      ],
+      "stop_on_redirect": false,
+      "script": "",
+      "on_error": "continue",
+      "wait_secs": 0
+    },
+    {
+      "id": "resolve",
+      "name": "整理门户地址，已联网时跳过认证",
+      "kind": "transform",
+      "method": "GET",
+      "url": "",
+      "headers": "",
+      "body": "",
+      "extract": "",
+      "extract_as": "",
+      "extracts": [],
+      "stop_on_redirect": false,
+      "script": "function transform(ctx) { var p = ctx.vars.portal_path || ''; if (p.indexOf('http://wlan.jsyd139.com/') === 0) p = p.slice('http://wlan.jsyd139.com/'.length); else if (p.indexOf('https://wlan.jsyd139.com/') === 0) p = p.slice('https://wlan.jsyd139.com/'.length); else if (/^[a-z]+:/i.test(p) || p.indexOf('//') === 0) throw new Error('认证入口不是当前移动门户'); p = p.replace(/^\\/+/, ''); return { frame_path: p }; }",
+      "on_error": "stop",
+      "wait_secs": 0
+    },
+    {
+      "id": "form",
+      "name": "读取动态登录令牌",
+      "kind": "request",
+      "method": "GET",
+      "url": "http://wlan.jsyd139.com/{frame_path}",
+      "headers": "Referer: http://wlan.jsyd139.com/",
+      "body": "",
+      "extract": "",
+      "extract_as": "",
+      "extracts": [
+        {
+          "source": "html:paramStr",
+          "name": "portal_param"
+        }
+      ],
+      "stop_on_redirect": false,
+      "script": "",
+      "on_error": "continue",
+      "wait_secs": 0
+    },
+    {
+      "id": "encode",
+      "name": "编码账号、密码和令牌",
+      "kind": "transform",
+      "method": "GET",
+      "url": "",
+      "headers": "",
+      "body": "",
+      "extract": "",
+      "extract_as": "",
+      "extracts": [],
+      "stop_on_redirect": false,
+      "script": "function transform(ctx) { var param = ctx.vars.portal_param || ''; if (!param) { if (ctx.vars.portal_path) throw new Error('门户未返回登录令牌，请检查认证页面'); return { auth_path: '', auth_body: '' }; } return { auth_path: 'authServlet', auth_body: 'paramStr=' + url_encode(param) + '&UserType=&province=&pwdType=1&serviceType=301&isCookie=false&province=&cookieType=-1&UserName=' + url_encode(ctx.username) + '&PassWord=' + url_encode(ctx.password) }; }",
+      "on_error": "stop",
+      "wait_secs": 0
+    },
+    {
+      "id": "login",
+      "name": "提交移动宽带认证",
+      "kind": "request",
+      "method": "POST",
+      "url": "http://wlan.jsyd139.com/{auth_path}",
+      "headers": "Content-Type: application/x-www-form-urlencoded\nOrigin: http://wlan.jsyd139.com\nReferer: http://wlan.jsyd139.com/{frame_path}",
+      "body": "{auth_body}",
+      "extract": "",
+      "extract_as": "",
+      "extracts": [],
+      "stop_on_redirect": false,
+      "script": "",
+      "on_error": "stop",
+      "wait_secs": 0
+    }
+  ],
+  "result_step_id": "login",
+  "method": "GET",
+  "url": "",
+  "auth_url": "http://wlan.jsyd139.com/",
+  "headers": "",
+  "body": "",
+  "success_pattern": "",
+  "failure_pattern": "",
+  "failure_action": "retry",
+  "success_check": "network",
+  "crypto_script": "",
+  "ignore_https_errors": null,
+  "metadata": {
+    "author": "xiyuchengxu",
+    "school": "苏州科技大学",
+    "device": "未知",
+    "carrier": "中国移动",
+    "portal": "http://wlan.jsyd139.com/",
+    "protocol": "HTTP 重定向 → 动态 paramStr 与会话 Cookie → POST /authServlet → 联网验证",
+    "tested_environment": {
+      "os": "Windows 11",
+      "campus_auth_version": "5.1.3",
+      "date": "2026-11-13",
+      "result": "用户实测：关闭 Clash Verge 后自动登录成功"
+    },
+    "known_limitations": [
+      "Clash Verge 随开机自启动且同时开启系统代理和 TUN 时，用户实测登录连接超时；关闭 Clash Verge 后成功。",
+      "未覆盖其他校区、运营商或认证设备部署；仅确认本任务对应的江苏移动门户。"
+    ]
+  },
+  "id": "sust_cmcc",
+  "version": "1.0.0"
+}
