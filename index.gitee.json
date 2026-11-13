@@ -977,5 +977,20 @@
     "version": "1.0.0",
     "type": "browser",
     "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/hngy.json"
+  },
+  {
+    "id": "sust_cmcc",
+    "name": "苏州科技大学移动校园网登录",
+    "description": "苏州科技大学移动校园网：自动读取门户重定向与动态令牌后提交登录。Windows 11 / 认证喵 5.1.3 用户实测成功；Clash Verge 开机自启并同时开启系统代理、TUN 时会超时，需先退出 Clash Verge 完成认证。认证设备型号未知。",
+    "tags": [
+      "苏州科技大学",
+      "SUST",
+      "中国移动",
+      "江苏移动"
+    ],
+    "author": "xiyuchengxu",
+    "version": "1.0.0",
+    "type": "http",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/sust_cmcc.json"
   }
 ]
