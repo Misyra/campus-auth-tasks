@@ -854,5 +854,18 @@
     "version": "1.0.0",
     "type": "http",
     "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/xauat.json"
+  },
+  {
+    "id": "sicau",
+    "name": "四川农业大学成都校区校园网登录",
+    "description": "适用于四川农业大学成都校区已知接入点。使用本机 IPv4 并对账号密码进行表单编码。切换接入点时，请根据实际门户同步核对请求地址与 Referer 中的 wlanacname 和 nasip。需要支持新版 HTTP 流程的认证喵，已用 v5.1.3 验证导入。",
+    "tags": [
+      "四川农业大学",
+      "SICAU"
+    ],
+    "author": "Lunareith",
+    "version": "1.0.0",
+    "type": "http",
+    "url": "https://raw.giteeusercontent.com/Misyra/campus-auth-tasks/raw/master/tasks/sicau.json"
   }
 ]

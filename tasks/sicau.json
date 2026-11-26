@@ -1,0 +1,57 @@
+{
+  "auth_url": "",
+  "body": "",
+  "crypto_script": "",
+  "description": "适用于四川农业大学成都校区已知接入点。使用本机 IPv4 并对账号密码进行表单编码。切换接入点时，请根据实际门户同步核对请求地址与 Referer 中的 wlanacname 和 nasip。需要支持新版 HTTP 流程的认证喵，已用 v5.1.3 验证导入。",
+  "failure_action": "credential",
+  "failure_pattern": "",
+  "headers": "",
+  "ignore_https_errors": null,
+  "metadata": {
+    "author": "Lunareith",
+    "school": "四川农业大学"
+  },
+  "method": "GET",
+  "name": "四川农业大学成都校区校园网登录",
+  "result_step_id": "login",
+  "schema_version": 2,
+  "steps": [
+    {
+      "body": "",
+      "extract": "",
+      "extract_as": "",
+      "extracts": [],
+      "headers": "",
+      "id": "step_1",
+      "kind": "transform",
+      "method": "GET",
+      "name": "计算字段",
+      "on_error": "stop",
+      "script": "function transform(ctx) {\n    return {\n        username: url_encode(ctx.username),\n        password: url_encode(ctx.password)\n    };\n}",
+      "stop_on_redirect": false,
+      "url": "",
+      "wait_secs": 0
+    },
+    {
+      "body": "scheme=https&serverIp=portal.sicau.edu.cn%3A443&hostIp=http%3A%2F%2F127.0.0.1%3A8445%2F&loginType=&auth_type=0&isBindMac1=0&pageid=401&templatetype=1&listbindmac=0&recordmac=0&isRemind=1&loginTimes=&groupId=&distoken=&echostr=&url=&isautoauth=&mobile=&notice_pic_loop1=%2Fportal%2Fuploads%2Fpc%2Fdemo3%2Fimages%2Flogo.jpg&notice_pic_loop2=%2Fportal%2Fuploads%2Fpc%2Fdemo3%2Fimages%2Frrs_bg.jpg&userId={username}&passwd={password}&remInfo=on",
+      "extract": "",
+      "extract_as": "",
+      "extracts": [],
+      "headers": "Content-Type: application/x-www-form-urlencoded\nOrigin: https://portal.sicau.edu.cn\nReferer: https://portal.sicau.edu.cn/portal.do?wlanuserip={local_ip}&wlanacname=WJ-C10-Bras01-ME60-X8A&nasip=5.5.5.18",
+      "id": "login",
+      "kind": "request",
+      "method": "POST",
+      "name": "登录请求",
+      "on_error": "stop",
+      "script": "",
+      "stop_on_redirect": false,
+      "url": "https://portal.sicau.edu.cn/webauth.do?wlanuserip={local_ip}&wlanacname=WJ-C10-Bras01-ME60-X8A&nasip=5.5.5.18",
+      "wait_secs": 0
+    }
+  ],
+  "success_check": "network",
+  "success_pattern": "",
+  "task_id": "sicau",
+  "type": "http",
+  "url": ""
+}
